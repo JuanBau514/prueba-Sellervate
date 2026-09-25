@@ -123,6 +123,18 @@ async function main() {
   const nuriaVoltia = await rest(nuria.token, `replies?select=id&brand_id=eq.${voltia}`);
   check(nuriaVoltia.rows.length === 0, "Nuria (lead) gets 0 replies from Marta's brand", `${nuriaVoltia.rows.length} rows`);
 
+  const daniQueue = await rest(dani.token, 'review_queue?select=reply_id');
+  const daniCoverage = await rest(dani.token, 'review_coverage?select=specialist_id');
+  check(daniQueue.rows.length === 0 && daniCoverage.rows.length === 0,
+    "Specialists get no review queue or colleagues' coverage", `${daniQueue.rows.length}/${daniCoverage.rows.length} rows`);
+
+  const nuriaQueue = await rest(nuria.token, 'review_queue?select=brand_id');
+  check(nuriaQueue.rows.length > 0 && nuriaQueue.rows.every((row) => row.brand_id === brisa),
+    "Nuria's queue contains only her brand", `${nuriaQueue.rows.length} rows`);
+
+  const anonQueue = await rest(null, 'review_queue?select=reply_id');
+  check(anonQueue.status >= 400 && anonQueue.rows.length === 0, 'Anonymous request cannot read the queue', `status ${anonQueue.status}`);
+
   const martaTeam = await rest(marta.token, `replies?select=id&brand_id=eq.${cajaNorte}&specialist_id=eq.${lucia}`);
   check(martaTeam.rows.length > 0, "Marta (lead) reads her brand's replies from every specialist");
 
