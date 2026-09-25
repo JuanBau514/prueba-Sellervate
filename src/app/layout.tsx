@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { getViewer } from "@/lib/data/viewer";
 import { UserSwitcher } from "./user-switcher";
@@ -16,7 +17,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         <header className="border-b border-neutral-200">
           <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 px-6 py-3">
-            <span className="font-semibold">Sellervate</span>
+            <nav className="flex items-center gap-4" aria-label="Main">
+              <Link href="/" className="font-semibold">
+                Sellervate
+              </Link>
+              {viewer?.role === "lead" && (
+                <Link href="/review" className="text-sm link link-hover">
+                  Review queue
+                </Link>
+              )}
+            </nav>
             <UserSwitcher viewer={viewer} />
           </div>
         </header>

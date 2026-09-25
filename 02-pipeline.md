@@ -246,6 +246,8 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 **Hecho cuando:** Marta ve su cola ordenada y Nuria ve una cola distinta.
 
+*Implementado:* ventana de 14 días; la cobertura es por marca **y** especialista, calculada en SQL con vistas `security_invoker` que solo devuelven marcas lideradas.
+
 **Qué revisar en el PR:** ordenamiento hecho en el cliente, consultas N+1 por especialista, estado vacío ausente.
 
 ---
@@ -402,7 +404,12 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/seed` / GitHub PR #4 | `c4aed98` | Seed creíble sin dependencias nuevas; pruebas acotadas a fixtures | P3 | Ver `ai-logs/P3.md` | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #4 | `f2766c1` | Integración de P3 mediante merge commit | P3 | Confirmado por Git; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
 
-**Entrega P4:** `feat/authz` parte de `f2766c1`; migración de políticas RLS con helpers `security definer`, sesión real con cookies httpOnly y renovación en `src/proxy.ts` (sin `@supabase/ssr`), capa `src/lib/data/*`, selector de usuario, `GET /api/replies/[id]`, `authorization.test.sql` y `npm run authz-check`. Registro en `ai-logs/P4.md`; descripción de PR en `docs/P4-pr.md`. P5 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
+**Entrega P4:** `feat/authz` parte de `f2766c1`; migración de políticas RLS con helpers `security definer`, sesión real con cookies httpOnly y renovación en `src/proxy.ts` (sin `@supabase/ssr`), capa `src/lib/data/*`, selector de usuario, `GET /api/replies/[id]`, `authorization.test.sql` y `npm run authz-check`. Registro en `ai-logs/P4.md`; descripción de PR en `docs/P4-pr.md`. Publicado como `020de45`.
+
+| 2026-09-25 | `feat/authz` / GitHub PR #5 | `020de45` | RLS por asignación de marca, sesión real sin dependencias, capa de datos y `authz-check` | P4 | Ver `ai-logs/P4.md` | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #5 | `5e93c3b` | Integración de P4 mediante merge commit | P4 | Autor verificó el funcionamiento; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
+
+**Entrega P5:** `feat/review-queue` parte de `5e93c3b`; vistas `review_queue` y `review_coverage` (`security_invoker`, solo líderes), página `/review` agrupada por marca con cobertura por especialista y estados vacíos, portada que lleva al líder a su cola, `review_queue.test.sql` y tres casos nuevos en `authz-check`. También cierra pendientes de P3/P4 por instrucción del usuario. Registro en `ai-logs/P5.md`; descripción de PR en `docs/P5-pr.md`. P6 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
 
 ### Plantilla de revisión para cada PR
 

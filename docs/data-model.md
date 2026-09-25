@@ -85,3 +85,12 @@ Referencias: [restricciones de PostgreSQL 17](https://www.postgresql.org/docs/17
 Privilegios: `SELECT` en las ocho tablas; `INSERT (reply_id, reviewer_id, score, comment, is_example)` y `UPDATE (score, comment, is_example)` en `reviews`; `INSERT/DELETE` en `review_tags`; `INSERT` de columnas de negocio en `brand_changes`. Sin borrado de revisiones, sin escritura de respuestas, marcas, asignaciones ni criterios desde la API. `anon` no tiene nada.
 
 Las escrituras pasan dos capas: los triggers de P2 (líder asignado, etiqueta de la marca) se ejecutan antes y RLS exige además que el autor sea el usuario de la sesión y siga asignado. Retirar una asignación corta el acceso de inmediato; las revisiones históricas se conservan. Un colíder puede leer, pero no editar, las revisiones de otro líder de la misma marca.
+
+## P5 · Cola y cobertura
+
+`20260925190000_review_queue.sql` crea dos vistas con `security_invoker = true`, así que RLS de P4 sigue decidiendo qué filas existen. Además filtran por `private.is_brand_lead`, de modo que un especialista obtiene una cola vacía desde la base, no por ocultarla en la interfaz.
+
+- `review_coverage`: una fila por marca y especialista asignado (parte de `brand_memberships`, así aparecen también quienes nunca han sido revisados). Días desde la última revisión *en esa marca*, respuestas sin revisar de los últimos 14 días y revisadas/total de 4 semanas. Revisar a alguien en una marca no oculta su hueco en otra.
+- `review_queue`: respuestas sin revisión de los últimos 14 días, con la cobertura de su especialista para ordenar en SQL: `last_reviewed_at` ascendente con nulos primero y después `sent_at` ascendente.
+
+Nada se almacena: las cifras salen de `replies` y `reviews` en cada lectura. `anon` no tiene privilegios sobre las vistas.
