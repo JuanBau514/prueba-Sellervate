@@ -372,8 +372,8 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 | Fecha | Rama / PR | Commit | Qué se hizo | Problema | Revisión / decisión | Tiempo acumulado |
 |---|---|---|---|---|---|---|
-| | | | Planificación: `01-problema.md` y `02-pipeline.md` | — | — | |
-| | | | | | | |
+| 2026-09-24 | `main` (base documental) | `4fe1b3a` | Versionar interpretación y pipeline originales; ignorar secretos, dependencias y PDF fuente | — | Tiempo de preparación previo pendiente de confirmar | Pendiente |
+| 2026-09-24 | `chore/scaffold` / PR pendiente de autenticación | Identificado por asunto: `chore: scaffold Next.js app and local Supabase workflow` | Base ejecutable, configuración local, reglas y prompt independiente; ver `ai-logs/P0.md` | P0 | Revisión humana pendiente; el resultado del agente no la sustituye | Ver `docs/time-log.md` |
 
 ### Plantilla de revisión para cada PR
 

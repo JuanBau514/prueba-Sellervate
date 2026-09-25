@@ -1,0 +1,49 @@
+# Execution agreement
+
+The source of requirements is the seven-page exercise. `01-problema.md` is the product interpretation and section 1 of `02-pipeline.md` is the work map. Those original documents remain at the repository root so existing references keep working.
+
+## Interpretation
+
+The core problem is that expert judgement disappears after a Slack message. A lead reviews an already-sent reply against its brand's procedures; the specialist reads that feedback; the lead can reuse it as evidence. The first release prioritizes that complete loop. Reporting remains small. Coaching screens, helpdesk imports and model-based scoring are outside this release.
+
+## Clarifications to the original pipeline
+
+- The brief allows Codex and other agents; Claude Code is not a requirement. This session uses Codex.
+- Next.js App Router, TypeScript, Supabase and Tailwind are required. daisyUI, Recharts, local Supabase and the precise schema are implementation choices.
+- One isolated prompt per problem does not require one PR per problem: the original map already groups P1/P2. Keep the original branch mapping for now. Its eleven PRs need to fit the review budget; the brief says four or five are sufficient.
+- P0 is configured manually from the official Next.js installation pattern because the directory already contains the user's planning files. No starter kit is used.
+- Human review before merge is part of the evaluated deliverable. An agent self-check cannot substitute for it. P0 ends with a reviewable branch; subsequent dependent work follows its review and merge.
+- RLS must be enabled at table creation in P1, with no client access until policies are added in P4.
+- Authorization checks must cover another specialist **in the same brand**, another lead's brand, anonymous requests and forbidden writes, as well as the original API check.
+- Brand membership requires its own policy. A global role must not grant cross-brand access. Brand-specific tags must be validated against the reviewed reply.
+- Coverage is calculated per brand and specialist, including never-reviewed specialists. Reviewing a person for one brand must not conceal a gap for another.
+- A review and its tags must be saved in one transaction. SQL aggregates must preserve RLS and visible sample sizes.
+
+## Independent prompts and execution order
+
+Use this contract for each new task, replacing `P…` with the entry below:
+
+> Read CLAUDE.md, 01-problema.md, docs/implementation-plan.md and the P… section of 02-pipeline.md. Implement only P… on its designated branch from reviewed main. State the scoped plan, inspect the existing implementation, preserve user changes, and record this prompt. Run the acceptance checks, review the diff for security and scope, and report what passed and what was blocked. Commit and push the branch to JuanBau514/prueba-Sellervate and open a PR if authenticated access is available. Leave the actual human review and merge pending; do not fabricate either. Record real time, decisions and remaining work. Do not begin the next problem in this turn.
+
+| Order | Prompt scope | Branch | Acceptance focus |
+| --- | --- | --- | --- |
+| 1 | P0: project base and working rules | `chore/scaffold` | App starts; lint/types/build; local Supabase starts |
+| 2 | P9a: custom visual foundations | `feat/design-tokens` | Theme, type scale and reading typography |
+| 3 | P1: brands, people, memberships and replies | `feat/data-model` | Migration, constraints, indexes, default-deny RLS |
+| 4 | P2: brand-relative criteria and severity | `feat/data-model` (same PR as P1) | Tags/reviews model; migration reruns |
+| 5 | P3: credible demo dataset | `feat/seed` | Three brands, two leads, three specialists and relative dates |
+| 6 | P4: server authorization and user switching | `feat/authz` | Direct API/database checks, including same-brand privacy |
+| 7 | P5: review queue and coverage | `feat/review-queue` | Per-brand prioritization and distinct lead queues |
+| 8 | P6: contextual review workspace | `feat/review-workspace` | Atomic save, valid tags and next reply |
+| 9 | P7: specialist feedback | `feat/specialist-view` | Own reviews only, sample sizes and empty state |
+| 10 | P8: evidence per brand | `feat/brand-overview` | Trend with n, critical issues, recurring tags and coverage |
+| 11 | P9b: states and interface polish | `chore/states-polish` | Loading/error/empty states, focus and small screens |
+| 12 | P10: handoff documentation | `docs/decisions` | Fresh-clone instructions, actual time and two-page decisions |
+
+P1 and P2 remain separate prompts but share a branch as specified by the original map. Finish both before that PR's human review and merge. Apply the original pipeline's cuts if time runs short.
+
+## References consulted for P0
+
+- [Next.js installation](https://nextjs.org/docs/app/getting-started/installation)
+- [Supabase local development](https://supabase.com/docs/guides/local-development/cli/getting-started)
+- [daisyUI installation](https://daisyui.com/docs/install/)
