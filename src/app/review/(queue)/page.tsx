@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/components/empty-state";
 import { listBrands, type Brand } from "@/lib/data/brands";
 import { listCoverage, listQueue, type Coverage, type QueueItem } from "@/lib/data/queue";
 import { getViewer } from "@/lib/data/viewer";
@@ -116,7 +117,13 @@ export default async function ReviewQueuePage({ searchParams }: PageProps<"/revi
         </p>
       )}
 
-      {brands.length === 0 && <p className="mt-8">You are not leading any brand yet, so there is nothing to review.</p>}
+      {brands.length === 0 && (
+        <div className="mt-8">
+          <EmptyState title="You are not leading any brand yet">
+            Once you are assigned to a brand as its lead, its unreviewed replies and your team&apos;s coverage appear here.
+          </EmptyState>
+        </div>
+      )}
 
       {brands.map((brand) => (
         <section key={brand.id} className="mt-10" aria-labelledby={`brand-${brand.id}`}>
@@ -158,9 +165,14 @@ export default async function ReviewQueuePage({ searchParams }: PageProps<"/revi
           </table>
 
           {brand.items.length === 0 ? (
-            <p className="mt-4 rounded-box border border-dashed border-rule px-5 py-4 text-muted">
-              Nothing waiting in {brand.name}: every reply from the last 14 days has been reviewed.
-            </p>
+            <div className="mt-4">
+              <EmptyState
+                title={`Nothing waiting in ${brand.name}`}
+                action={brand.slug ? { href: `/brands/${brand.slug}`, label: "See the brand evidence" } : undefined}
+              >
+                Every reply from the last 14 days has been reviewed. The trend and recurring issues are on the brand page.
+              </EmptyState>
+            </div>
           ) : (
             <ol className="mt-4 space-y-3">
               {brand.items.map((item) => (

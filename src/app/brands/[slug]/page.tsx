@@ -209,7 +209,10 @@ export default async function BrandOverviewPage({ params, searchParams }: PagePr
           description="Issues by specialist over the last 6 weeks. The same issue in two or more different weeks is a pattern worth a conversation, not a bad day."
         >
           {patterns.length === 0 ? (
-            <p className="text-muted">No issues were tagged in the last 6 weeks.</p>
+            <p className="text-muted">
+              No issues were tagged in the last 6 weeks. Patterns appear once reviews tag what went wrong —{" "}
+              <Link href="/review" className="text-primary hover:underline">open the review queue</Link>.
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -217,9 +220,9 @@ export default async function BrandOverviewPage({ params, searchParams }: PagePr
                   <tr>
                     <th className="pb-2 font-semibold">Issue</th>
                     <th className="pb-2 font-semibold">Specialist</th>
-                    <th className="pb-2 text-right font-semibold">Times</th>
-                    <th className="pb-2 text-right font-semibold">Weeks</th>
-                    <th className="pb-2 text-right font-semibold">Last seen</th>
+                    <th className="pb-2 pl-3 text-right font-semibold">Times</th>
+                    <th className="pb-2 pl-3 text-right font-semibold">Weeks</th>
+                    <th className="hidden pb-2 pl-3 text-right font-semibold whitespace-nowrap sm:table-cell">Last seen</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -238,9 +241,11 @@ export default async function BrandOverviewPage({ params, searchParams }: PagePr
                           {repeated && <span className="text-xs text-muted"> · repeated in {pattern.weeks} different weeks</span>}
                         </td>
                         <td className="py-2 pr-3">{pattern.specialist_name}</td>
-                        <td className="py-2 text-right tabular-nums">{pattern.occurrences}</td>
-                        <td className={`py-2 text-right tabular-nums ${repeated ? "font-semibold" : ""}`}>{pattern.weeks}</td>
-                        <td className="py-2 text-right text-muted">{sentFormat.format(new Date(pattern.last_seen))}</td>
+                        <td className="py-2 pl-3 text-right tabular-nums">{pattern.occurrences}</td>
+                        <td className={`py-2 pl-3 text-right tabular-nums ${repeated ? "font-semibold" : ""}`}>{pattern.weeks}</td>
+                        <td className="hidden py-2 pl-3 text-right whitespace-nowrap text-muted sm:table-cell">
+                          {sentFormat.format(new Date(pattern.last_seen))}
+                        </td>
                       </tr>
                     );
                   })}
@@ -258,7 +263,9 @@ export default async function BrandOverviewPage({ params, searchParams }: PagePr
             </p>
           )}
           {chronological.length === 0 ? (
-            <p className="mb-4 text-muted">No changes recorded yet.</p>
+            <p className="mb-4 text-muted">
+              No changes recorded yet. Record the next briefing or procedure update below and it will appear on the trend.
+            </p>
           ) : (
             <ol className="mb-5 space-y-2 text-sm">
               {[...chronological].reverse().map((change) => (

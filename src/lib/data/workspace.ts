@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { listQueue } from './queue';
 import { rpc, select } from './rest';
 
@@ -27,8 +29,8 @@ export type ReviewContext = {
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuid = (value: string) => uuidPattern.test(value);
 
-/** Reply, brand procedures and any existing review, or null if RLS hides it. */
-export async function getReviewContext(replyId: string): Promise<ReviewContext | null> {
+/** Reply, brand procedures and any existing review, or null if RLS hides it. Memoized per request. */
+export const getReviewContext = cache(async (replyId: string): Promise<ReviewContext | null> => {
   if (!isUuid(replyId)) return null;
   const [reply] = await select<ReviewContext>(
     'replies?select=id,sent_at,customer_message,body,first_response_minutes,' +
@@ -37,7 +39,7 @@ export async function getReviewContext(replyId: string): Promise<ReviewContext |
       `review_tags(tag:issue_tags(label,severity)))&id=eq.${replyId}`,
   );
   return reply ?? null;
-}
+});
 
 /** Global criteria plus the brand's own, most severe first (critical < major < minor). */
 export function listCriteria(brandId: string) {

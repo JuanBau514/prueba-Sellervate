@@ -20,6 +20,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en" data-theme="sellervate" className={`${publicSans.variable} ${literata.variable}`}>
       <body className="min-h-screen antialiased">
+        <a
+          href="#content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-field focus:bg-sheet focus:px-3 focus:py-2 focus:shadow"
+        >
+          Skip to content
+        </a>
         <header className="border-b border-rule bg-sheet">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
             <nav className="flex items-center gap-5" aria-label="Main">
@@ -43,7 +49,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             <UserSwitcher viewer={viewer} />
           </div>
         </header>
-        {children}
+        <div id="content" tabIndex={-1} className="outline-none">
+          {children}
+        </div>
       </body>
     </html>
   );

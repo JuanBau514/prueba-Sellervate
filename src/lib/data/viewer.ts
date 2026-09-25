@@ -1,12 +1,14 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import { getAccessToken } from '@/lib/auth/session';
 import { SignedOutError, select } from './rest';
 
 export type Viewer = { id: string; fullName: string; role: 'lead' | 'specialist'; email: string };
 
-/** The signed-in person, or null. PostgREST verifies the token on the lookup. */
-export async function getViewer(): Promise<Viewer | null> {
+/** The signed-in person, or null. PostgREST verifies the token on the lookup. Memoized per request. */
+export const getViewer = cache(async (): Promise<Viewer | null> => {
   const token = await getAccessToken();
   if (!token) return null;
 
@@ -29,4 +31,4 @@ export async function getViewer(): Promise<Viewer | null> {
     if (error instanceof SignedOutError) return null;
     throw error;
   }
-}
+});

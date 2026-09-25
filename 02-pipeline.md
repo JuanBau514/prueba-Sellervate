@@ -430,7 +430,12 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/specialist-view` / GitHub PR #8 | `cd2851d` | `/me` con resumen por marca (promedio y n), filtro y feedback | P7 | Ver `ai-logs/P7.md` | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #8 | `64134e3` | Integración de P7 mediante merge commit | P7 | Confirmado por Git | Ver `docs/time-log.md` |
 
-**Entrega P8:** `feat/brand-overview` parte de `64134e3`; vistas `brand_weekly_scores`, `brand_critical_reviews` y `brand_issue_patterns` (`security_invoker`, solo líderes, por `brand_id`), autor de `brand_changes` desde la sesión, `/brands` y `/brands/[slug]` con tendencia SVG con n y marcadores, críticos, patrones, cobertura y registro de cambios; `brand_overview.test.sql` y cuatro casos nuevos en `authz-check`. Registro en `ai-logs/P8.md`; descripción de PR en `docs/P8-pr.md`. P9b no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
+**Entrega P8:** `feat/brand-overview` parte de `64134e3`; vistas `brand_weekly_scores`, `brand_critical_reviews` y `brand_issue_patterns` (`security_invoker`, solo líderes, por `brand_id`), autor de `brand_changes` desde la sesión, `/brands` y `/brands/[slug]` con tendencia SVG con n y marcadores, críticos, patrones, cobertura y registro de cambios; `brand_overview.test.sql` y cuatro casos nuevos en `authz-check`. Registro en `ai-logs/P8.md`; descripción de PR en `docs/P8-pr.md`. Publicado como `e225e64`.
+
+| 2026-09-25 | `feat/brand-overview` / GitHub PR #9 | `e225e64` | Evidencia por marca: tendencia con n, críticos, patrones, cobertura y cambios | P8 | Ver `ai-logs/P8.md` | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #9 | `809c6c4` | Integración de P8 mediante merge commit | P8 | Autor verificó el funcionamiento | Ver `docs/time-log.md` |
+
+**Entrega P9b:** `chore/states-polish` parte de `809c6c4`; `loading.tsx` por ruta, `error.tsx` y `global-error.tsx`, estados vacíos con acción, skip link y tablas móviles; guardas en layouts de segmento y páginas de lista en grupos de rutas para conservar 404/307 con streaming. Registro en `ai-logs/P9b.md`; descripción de PR en `docs/P9b-pr.md`.
 
 ### Plantilla de revisión para cada PR
 

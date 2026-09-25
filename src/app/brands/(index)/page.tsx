@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { EmptyState } from "@/components/empty-state";
 import { listBrands } from "@/lib/data/brands";
 import { listBrandSummary } from "@/lib/data/feedback";
 import { getViewer } from "@/lib/data/viewer";
@@ -19,7 +20,11 @@ export default async function BrandsPage() {
         The evidence you can show each brand: weekly trend, critical issues, recurring patterns and coverage.
       </p>
       {brands.length === 0 ? (
-        <p className="mt-8 text-muted">You are not leading any brand yet.</p>
+        <div className="mt-8">
+          <EmptyState title="You are not leading any brand yet" action={{ href: "/review", label: "Go to the review queue" }}>
+            Brand evidence appears here for each brand you lead.
+          </EmptyState>
+        </div>
       ) : (
         <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {brands.map((brand) => {
