@@ -8,20 +8,20 @@ Herramienta interna para evaluar respuestas de soporte ya enviadas según los pr
 
 ### Estado y rama principal
 
-**En construcción; todavía no es la entrega final.** P0 está implementado y verificado: Next.js App Router, TypeScript, Tailwind/daisyUI y configuración de Supabase local. El modelo de datos, seed, cambio de usuario, autorización y recorridos del producto siguen pendientes.
+**En construcción; todavía no es la entrega final.** P0 está integrado en `main`. P1 añade en `feat/data-model` las tablas de marcas, personas, asignaciones y respuestas, con integridad e índices y acceso cerrado por defecto. Los criterios/revisiones de P2, seed, cambio de usuario, políticas de autorización y recorridos del producto siguen pendientes.
 
 **`main` es la rama principal de integración y entrega.** Cada problema se trabaja con un prompt independiente y una rama basada en `main`; su PR apunta a `main`. Después de tu revisión escrita y las correcciones, se incorpora mediante **merge commit**, conservando ramas y commits, sin squash ni rebase. P1/P2 comparten un PR según el pipeline. Las mejoras siguientes parten del `main` actualizado.
 
-Estado remoto comprobado el 24 de septiembre de 2026: GitHub tiene publicado P0 en `chore/scaffold` (`bcf7d90`) y la usa como rama predeterminada. Falta publicar `main`, seleccionarla como predeterminada y revisar e integrar P0. Esto requiere acceso autenticado; no se presenta como realizado. Consulta el [procedimiento de integración](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
+`main` es la rama predeterminada y contiene P0 mediante el merge del PR #1 (`1beec2a`). P1/P2 se preparan en `feat/data-model` para PR1 del pipeline (el número asignado por GitHub puede ser distinto). Usamos exclusivamente **Git por SSH** en la terminal y la web de GitHub para crear/revisar/integrar PR. Consulta el [procedimiento de integración](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
 
 ### Instalación y ejecución local
 
 Requisitos: Node.js 22 o superior (24 recomendado), npm y Docker Desktop iniciado. Supabase CLI es una dependencia del proyecto; no requiere instalación global. Next.js se configuró manualmente; no se usó un starter kit.
 
-Una vez publicado e integrado P0 en `main`, el recorrido de entrega será:
+Para ejecutar la base integrada en `main`:
 
 ```sh
-git clone --branch main https://github.com/JuanBau514/prueba-Sellervate.git
+git clone --branch main git@github.com:JuanBau514/prueba-Sellervate.git
 cd prueba-Sellervate
 npm ci
 npm run db:start
@@ -29,7 +29,7 @@ cp .env.example .env.local
 npm run db:status
 ```
 
-Mientras P0 esté pendiente de integración, revisa la versión publicada sustituyendo únicamente `--branch main` por `--branch chore/scaffold`. En este checkout existente, empieza en `npm ci`. Si ya tienes `.env.local`, conserva sus valores y agrega solo las variables que falten.
+Para revisar P1 antes de su merge, cambia a `feat/data-model` después de clonar, una vez publicada la rama. En este checkout existente, empieza en `npm ci`. Si ya tienes `.env.local`, conserva sus valores y agrega solo las variables que falten. Un evaluador sin llave SSH puede clonar el repositorio público con `https://github.com/JuanBau514/prueba-Sellervate.git`; esto no cambia nuestro remoto de trabajo SSH.
 
 Copia la URL local y la clave `anon` de Supabase a `.env.local`. La clave `service_role` debe permanecer solo en el servidor; su único consumidor previsto es `scripts/seed.ts`. La página inicial de P0 no necesita credenciales. El primer arranque de Supabase descarga imágenes Docker y depende de la conexión.
 
@@ -41,9 +41,9 @@ Abre http://localhost:3000. Para detener Supabase: `npm run db:stop`.
 
 ### Datos de demostración y roles
 
-**Pendientes: P1–P4.** Aún no existen cuentas de demo, seed ni selector de usuario. El mínimo del brief es dos marcas, tres especialistas y dos líderes, con respuestas creíbles y suficientes revisiones. Nuestro plan usa tres marcas para demostrar el aislamiento entre líderes. P3 incorporará el seed y P4 el cambio de rol con autorización real en el servidor.
+**P1 implementado; pendientes P2–P4.** Aún no existen cuentas de demo, seed ni selector de usuario. El mínimo del brief es dos marcas, tres especialistas y dos líderes, con respuestas creíbles y suficientes revisiones. Nuestro plan usa tres marcas para demostrar el aislamiento entre líderes. P3 incorporará el seed y P4 el cambio de rol con autorización real en el servidor. Los fixtures de pruebas de P1 se revierten al terminar; no son datos de demostración.
 
-Los comandos de migración/seed y las cuentas se documentarán aquí cuando estén implementados y verificados. El objetivo obligatorio es pasar de un clon limpio al producto con datos y roles en menos de diez minutos; todavía no está verificado.
+La migración de P1 se aplica con `npm run db:reset` en la base local desechable. El comando de seed y las cuentas se documentarán cuando estén implementados y verificados. El objetivo obligatorio es pasar de un clon limpio al producto con datos y roles en menos de diez minutos; todavía no está verificado.
 
 ### Validación y limitaciones
 
@@ -51,9 +51,14 @@ Los comandos de migración/seed y las cuentas se documentarán aquí cuando est�
 npm run check
 ```
 
-Ejecuta ESLint, TypeScript y una compilación de producción. Estas comprobaciones pasaron en P0; también se verificaron el arranque de la app y la salud de Supabase. `npm run db:reset` borra los datos de la base local desechable; las migraciones se incorporarán en P1/P2.
+Ejecuta ESLint, TypeScript y una compilación de producción. Estas comprobaciones pasaron en P0; también se verificaron el arranque de la app y la salud de Supabase. Para aplicar P1 y probar su integridad en Supabase local, ejecuta lo siguiente en `feat/data-model`. **`db:reset` borra los datos locales**; úsalo solo en la base de desarrollo desechable:
 
-La primera prueba de comportamiento será el aislamiento por RLS entre marcas y entre especialistas de una misma marca, incluyendo llamadas directas a la API y escrituras prohibidas. P0 aún no tiene comportamiento de dominio que probar. La cobertura exhaustiva y el despliegue no son requisitos del brief; la evaluación ejecuta el proyecto localmente.
+```sh
+npm run db:reset
+npm run db:test
+```
+
+Las pruebas de P1 comprueban asignaciones válidas, identidad de importación, conservación del historial y denegación inicial por RLS. En P4 se reemplazará ese cierre total por pruebas de acceso permitido y prohibido entre marcas y especialistas, incluidas llamadas directas a la API. La cobertura exhaustiva y el despliegue no son requisitos del brief; la evaluación ejecuta el proyecto localmente. Ver [modelo y decisiones de P1](docs/data-model.md).
 
 ESLint está fijado en 9.39.5 por incompatibilidad de los plugins actuales de Next.js con ESLint 10. npm advierte que ESLint 9 está fuera de soporte. El intento de actualización y el fallo observado están registrados en [P0](ai-logs/P0.md).
 
@@ -77,20 +82,20 @@ An internal tool for evaluating already-sent customer support replies against ea
 
 ### Status and main branch
 
-**Work in progress; not the final submission.** P0 is implemented and verified: Next.js App Router, TypeScript, Tailwind/daisyUI and local Supabase configuration. The data model, seed, user switching, authorization and product journeys are still pending.
+**Work in progress; not the final submission.** P0 is integrated into `main`. P1 adds brands, people, assignments and replies on `feat/data-model`, with integrity constraints, indexes and access denied by default. P2 quality criteria/reviews, seed data, user switching, authorization policies and product journeys are still pending.
 
 **`main` is the integration and delivery branch.** Each problem uses an independent prompt and a working branch based on `main`; its PR targets `main`. After your written review and corrections, it is integrated with a **merge commit**, retaining branches and commits, without squash or rebase. P1/P2 share a PR as specified by the pipeline. Subsequent work starts from the updated `main`.
 
-Remote state checked on September 24, 2026: GitHub has P0 published on `chore/scaffold` (`bcf7d90`) and uses that as its default branch. Publishing `main`, making it the default, and reviewing and merging P0 remain outstanding. These steps require authenticated access and are not claimed as complete. See the [integration procedure](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
+`main` is the default branch and contains P0 through PR #1's merge (`1beec2a`). P1/P2 are prepared on `feat/data-model` for pipeline PR1 (GitHub may assign a different number). We use only **Git over SSH** in the terminal and GitHub's website to create, review and merge PRs. See the [integration procedure](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
 
 ### Local installation and startup
 
 Requirements: Node.js 22 or newer (24 recommended), npm and Docker Desktop running. Supabase CLI is a project dependency; no global installation is required. Next.js was configured manually; no starter kit was used.
 
-After P0 is published and merged into `main`, the delivery setup will be:
+To run the base integrated into `main`:
 
 ```sh
-git clone --branch main https://github.com/JuanBau514/prueba-Sellervate.git
+git clone --branch main git@github.com:JuanBau514/prueba-Sellervate.git
 cd prueba-Sellervate
 npm ci
 npm run db:start
@@ -98,7 +103,7 @@ cp .env.example .env.local
 npm run db:status
 ```
 
-While P0 awaits integration, preview the published version by replacing only `--branch main` with `--branch chore/scaffold`. In this existing checkout, start at `npm ci`. If `.env.local` already exists, preserve its values and add only missing variables.
+To review P1 before its merge, switch to `feat/data-model` after cloning once that branch is published. In this existing checkout, start at `npm ci`. If `.env.local` already exists, preserve its values and add only missing variables. Evaluators without an SSH key may clone the public repository using `https://github.com/JuanBau514/prueba-Sellervate.git`; this does not change our SSH working remote.
 
 Copy the local Supabase URL and anon key into `.env.local`. Keep the service role key server-only; its sole planned consumer is `scripts/seed.ts`. The P0 landing page does not need credentials. The first Supabase start downloads Docker images and depends on connection speed.
 
@@ -110,9 +115,9 @@ Open http://localhost:3000. Stop Supabase with `npm run db:stop`.
 
 ### Demo data and roles
 
-**Pending: P1–P4.** Demo accounts, seed data and a user switcher do not exist yet. The brief requires at least two brands, three specialists and two team leads, with credible replies and enough scored rows. Our plan uses three brands to demonstrate isolation between leads. P3 adds the seed; P4 adds role switching with real server-side authorization.
+**P1 implemented; P2–P4 pending.** Demo accounts, seed data and a user switcher do not exist yet. The brief requires at least two brands, three specialists and two team leads, with credible replies and enough scored rows. Our plan uses three brands to demonstrate isolation between leads. P3 adds the seed; P4 adds role switching with real server-side authorization. P1 test fixtures are rolled back after execution and are not demo data.
 
-Migration/seed commands and accounts will be documented here once implemented and verified. The required target is a working product with data and roles within ten minutes of a fresh clone; that target has not yet been verified.
+Apply the P1 migration with `npm run db:reset` on the disposable local database. Seed commands and accounts will be documented once implemented and verified. The required target is a working product with data and roles within ten minutes of a fresh clone; that target has not yet been verified.
 
 ### Validation and limitations
 
@@ -120,9 +125,14 @@ Migration/seed commands and accounts will be documented here once implemented an
 npm run check
 ```
 
-Runs ESLint, TypeScript and a production build. These checks passed for P0; application startup and Supabase health were also verified. `npm run db:reset` deletes the disposable local database's data; migrations arrive in P1/P2.
+Runs ESLint, TypeScript and a production build. These checks passed for P0; application startup and Supabase health were also verified. To apply P1 and test its integrity on local Supabase, run the following on `feat/data-model`. **`db:reset` deletes local data**; use it only on the disposable development database:
 
-The first behavioral test will verify RLS isolation across brands and between specialists in the same brand, including direct API access and forbidden writes. P0 has no domain behavior to test yet. Exhaustive coverage and deployment are not brief requirements; evaluation runs the project locally.
+```sh
+npm run db:reset
+npm run db:test
+```
+
+P1 tests valid assignments, import identity, history preservation and the initial RLS denial. P4 will replace the complete access closure with allowed/forbidden access tests across brands and specialists, including direct API calls. Exhaustive coverage and deployment are not brief requirements; evaluation runs the project locally. See [P1 model and decisions](docs/data-model.md).
 
 ESLint is pinned to 9.39.5 because the current Next.js plugins are incompatible with ESLint 10. npm reports ESLint 9 as out of support. The attempted upgrade and observed failure are recorded in [P0](ai-logs/P0.md).
 
@@ -149,5 +159,7 @@ The [evaluation and delivery matrix](docs/delivery-checklist.md) maps all eight 
 - [Reglas del agente / Agent working rules](CLAUDE.md)
 - [Prompt y registro de P0 / P0 prompt and record](ai-logs/P0.md)
 - [Descripción preparada del PR de P0 / Prepared P0 PR description](docs/P0-pr.md)
+- [Modelo de P1 / P1 data model](docs/data-model.md)
+- [Prompt y registro de P1 / P1 prompt and record](ai-logs/P1.md)
 
 El PDF del ejercicio se conserva localmente. / The supplied exercise PDF stays local.

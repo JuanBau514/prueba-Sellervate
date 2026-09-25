@@ -19,7 +19,7 @@ El brief fija Next.js App Router, TypeScript, Supabase y Tailwind. daisyUI, Supa
 | Estilos | **Tailwind + daisyUI** | Tema propio (tokens), no el tema por defecto. |
 | Gráficos | `recharts` (o SVG propio si pesa demasiado) | Tendencia por marca. |
 | Scripts | `tsx` | Seed y verificación de autorización. |
-| Flujo | **Codex** + `gh` CLI | Una rama por pieza de trabajo desde `main`, PR dirigido a `main`, revisión escrita y merge commit. El brief admite otros agentes. |
+| Flujo | **Codex** + Git por SSH + web de GitHub | Una rama por pieza de trabajo desde `main`, PR dirigido a `main`, revisión escrita y merge commit. Por instrucción del usuario no se usa `gh`. |
 
 ### Flujo de trabajo por PR (no negociable)
 
@@ -27,7 +27,7 @@ El brief fija Next.js App Router, TypeScript, Supabase y Tailwind. daisyUI, Supa
 
 1. `git checkout -b <rama>` desde `main` actualizado.
 2. El agente presenta el plan acotado al problema; implementa dentro del alcance autorizado por el usuario y registra el prompt independiente.
-3. El agente abre el PR con `gh pr create --base main` (título y descripción con: qué problema resuelve, qué decisiones tomó y qué comprobó).
+3. El agente publica la rama con Git por SSH y prepara título, descripción y enlace de comparación hacia `main`. El autor abre el PR en la web de GitHub. Esta adaptación explícita evita usar `gh`, según la instrucción del usuario; se conserva la revisión escrita y el historial exigidos por el brief.
 4. **Yo leo el diff y escribo la revisión** en el PR: qué está mal, qué dejo pasar y por qué. Si está limpio, una línea.
 5. Correcciones en commits de seguimiento en la **misma rama**.
 6. Merge **hacia `main`** con **merge commit**. Nunca squash, nunca rebase. Conservar las ramas y volver a `main` actualizado antes del siguiente problema.
@@ -143,7 +143,7 @@ Propuesta inicial (a validar en el PR):
 
 **Problema P2:** la calidad depende de la marca y los errores tienen pesos distintos.
 
-**Solución con el stack:** una migración SQL en `supabase/migrations/`.
+**Solución con el stack:** migraciones SQL en `supabase/migrations/`. P1 y P2 se implementan en prompts y commits separados dentro de `feat/data-model`: P1 crea las cuatro tablas base; P2 agrega los criterios y las revisiones. Detalles de integridad de P1 en [docs/data-model.md](docs/data-model.md).
 
 ```
 people            id (= auth.users.id), full_name, role ('lead'|'specialist')
@@ -385,7 +385,10 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | Fecha | Rama / PR | Commit | Qué se hizo | Problema | Revisión / decisión | Tiempo acumulado |
 |---|---|---|---|---|---|---|
 | 2026-09-24 | `main` (base documental) | `4fe1b3a` | Versionar interpretación y pipeline originales; ignorar secretos, dependencias y PDF fuente | — | Tiempo de preparación previo pendiente de confirmar | Pendiente |
-| 2026-09-24 | `chore/scaffold` / PR pendiente de autenticación | Identificado por asunto: `chore: scaffold Next.js app and local Supabase workflow` | Base ejecutable, configuración local, reglas y prompt independiente; ver `ai-logs/P0.md` | P0 | Revisión humana pendiente; el resultado del agente no la sustituye | Ver `docs/time-log.md` |
+| 2026-09-24 | `chore/scaffold` / GitHub PR #1 | `bcf7d90` | Base ejecutable, configuración local, reglas y prompt independiente; ver `ai-logs/P0.md` | P0 | Integrado posteriormente mediante merge commit | Ver `docs/time-log.md` |
+| 2026-09-24 | `chore/scaffold` / GitHub PR #1 | `c089886` | README bilingüe y criterios de entrega, commit realizado por el autor | P0 | Corrección solicitada por el usuario | Ver `docs/time-log.md` |
+| 2026-09-24 | `main` / GitHub PR #1 | `1beec2a` | Integración de P0 con merge commit | P0 | Historial conservado; lectura del comentario de revisión pendiente | Ver `docs/time-log.md` |
+| 2026-09-24 | `feat/data-model` / PR1 del pipeline | Asunto: `feat: model brands people assignments and replies` | Migración de cuatro tablas, RLS cerrado, 38 pruebas de integridad/acceso y documentación bilingüe | P1 | P2 seguirá en esta rama; PR y revisión humana pendientes | Ver `docs/time-log.md` |
 
 ### Plantilla de revisión para cada PR
 

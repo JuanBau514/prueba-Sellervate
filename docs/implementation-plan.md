@@ -25,16 +25,17 @@ See the [scoring and delivery matrix](delivery-checklist.md) for required eviden
 
 `main` is the permanent integration and submission branch. Every P0–P10 delivery (including P9a/P9b) reaches it through a reviewed PR. Working branches start from updated `main`; every PR explicitly uses `main` as its base. Keep merge commits, follow-up commits and working branches. Do not squash, rebase or replace main with an unreviewed feature branch.
 
-The public GitHub API currently shows only `chore/scaffold`, selected as the default branch. Local `main` exists at `4fe1b3a`, the initial planning commit. Preserve that base so P0's application changes can be reviewed. Once authenticated access is available:
+P0 is merged into `main` through GitHub PR #1 (`1beec2a`), and the remote HEAD points to `main`. The user requires Git over SSH exclusively in the terminal. Do not use `gh` or change the working remote to HTTPS. For each problem:
 
 ```sh
-git push -u origin main
-gh repo edit JuanBau514/prueba-Sellervate --default-branch main
-git push -u origin chore/scaffold
-gh pr create --repo JuanBau514/prueba-Sellervate --base main --head chore/scaffold --title "P0: application scaffold and delivery workflow" --body-file docs/P0-pr.md
+git switch main
+git pull --ff-only origin main
+git switch -c feat/data-model
+# Implement the scoped problem and commit the reviewed local diff.
+git push -u origin feat/data-model
 ```
 
-These are pending operations, not evidence they were performed. The human author then reads the PR and writes their review on GitHub. Resolve comments in this branch. After review and merge authorization, merge the PR using a merge commit and retain the branch. Return to `main`, pull with `--ff-only`, then create the next problem's branch. Publishing the initial planning base is the bootstrap; subsequent deliveries use this PR workflow.
+The agent prepares a PR description and the [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/data-model); the author creates the PR on GitHub with base `main`, writes their review there and merges with a merge commit after corrections. This is an explicit workflow adaptation to the user's Git-only requirement; it does not replace human review with an agent's self-check. Keep the branch. Return to `main`, pull with `--ff-only`, then create the next problem's branch. P1 and P2 share `feat/data-model`, so P2 continues there before PR1 is merged.
 
 Keep README.md in Spanish and English with equivalent setup instructions, status, seed/role guidance, actual-time accounting and submission requirements. Maintain the scoring and delivery checklist against the PDF, without declaring unfinished requirements complete.
 
@@ -42,7 +43,7 @@ Keep README.md in Spanish and English with equivalent setup instructions, status
 
 Use this contract for each new task, replacing `P…` with the entry below:
 
-> Read CLAUDE.md, 01-problema.md, docs/implementation-plan.md, docs/delivery-checklist.md and the P… section of 02-pipeline.md. Implement only P… on its designated branch from reviewed main. State the scoped plan, inspect the existing implementation, preserve user changes, and record this prompt. Run the acceptance checks, review the diff for security and scope, and report what passed and what was blocked. Keep the Spanish and English README sections equivalent. Commit and push the branch to JuanBau514/prueba-Sellervate and open a PR explicitly targeting main if authenticated access is available. Leave the actual human review and merge pending; do not fabricate either. Record real time, decisions, affected scoring evidence and remaining delivery requirements. Do not begin the next problem in this turn.
+> Read CLAUDE.md, 01-problema.md, docs/implementation-plan.md, docs/delivery-checklist.md and the P… section of 02-pipeline.md. Implement only P… on its designated branch from reviewed main. State the scoped plan, inspect the existing implementation, preserve user changes, and record this prompt. Run the acceptance checks, review the diff for security and scope, and report what passed and what was blocked. Keep the Spanish and English README sections equivalent. Commit and push the branch to JuanBau514/prueba-Sellervate using Git over SSH only; prepare a comparison link and PR description targeting main for creation on the GitHub website. Leave actual PR creation, human review and merge pending; do not fabricate them. Record real time, decisions, affected scoring evidence and remaining delivery requirements. Do not begin the next problem in this turn.
 
 | Order | Prompt scope | Branch | Acceptance focus |
 | --- | --- | --- | --- |
@@ -59,7 +60,7 @@ Use this contract for each new task, replacing `P…` with the entry below:
 | 11 | P9b: states and interface polish | `chore/states-polish` | Loading/error/empty states, focus and small screens |
 | 12 | P10: handoff documentation | `docs/decisions` | Fresh-clone instructions, actual time and two-page decisions |
 
-P1 and P2 remain separate prompts but share a branch as specified by the original map. Finish both before that PR's human review and merge. Apply the original pipeline's cuts if time runs short.
+P1 and P2 remain separate prompts but share a branch as specified by the original map. Finish both before that PR's human review and merge. The user selected P1 immediately after P0; P9a remains pending and is not a prerequisite for the database work. Apply the original pipeline's cuts if time runs short.
 
 ## References consulted for P0
 
