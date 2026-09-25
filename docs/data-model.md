@@ -73,3 +73,7 @@ El ensayo de actualización se ejecuta **solo sobre el esquema P1 anterior a la 
 Verificación P2: **110 aserciones aprobadas** (48 de P1 y 62 de P2), migración incremental aplicada y lint SQL de `public,private` sin errores. P1 añade una comprobación separada de la FK de asignación porque P2 ahora rechaza antes el movimiento de una respuesta entre marcas. No se ejecutó `db reset` sobre los datos locales. Las pruebas no sustituyen las pruebas de autorización funcional que faltan en P4.
 
 Referencias: [restricciones de PostgreSQL 17](https://www.postgresql.org/docs/17/ddl-constraints.html), [RLS en Supabase](https://supabase.com/docs/guides/database/postgres/row-level-security) y [pruebas locales](https://supabase.com/docs/guides/local-development/testing/overview).
+
+## P3 · Datos de demostración
+
+`scripts/seed.ts` escribe con la service role key y pasa por las mismas restricciones y triggers que cualquier escritura: autor especialista asignado, revisor líder asignado, etiqueta global o de la marca revisada. `external_id` sigue el patrón `<slug>-NNN` con `source = 'seed'`, de modo que un importador real (`source = 'helpdesk'`) no colisiona. Las revisiones fijan `created_at = updated_at` en el pasado para que las tendencias tengan historia; el trigger `touch_review` solo actúa en UPDATE.

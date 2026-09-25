@@ -10,7 +10,7 @@ The core problem is that expert judgement disappears after a Slack message. A le
 
 See the [scoring and delivery matrix](delivery-checklist.md) for required evidence and outstanding submission items.
 
-- The brief allows Codex and other agents; Claude Code is not a requirement. This session uses Codex.
+- The brief allows Codex and other agents; Claude Code is not a requirement. P0–P2 used Codex; P3 used Claude Code.
 - Next.js App Router, TypeScript, Supabase and Tailwind are required. daisyUI, Recharts, local Supabase and the precise schema are implementation choices.
 - The original map grouped P1/P2. The user's normalization review now requires separate branches and PRs: finish P1 on `feat/data-model`, then P2 on `feat/quality-criteria`. Keep the six-hour cap in mind; the brief says four or five real PRs are sufficient.
 - P0 is configured manually from the official Next.js installation pattern because the directory already contains the user's planning files. No starter kit is used.
@@ -25,7 +25,7 @@ See the [scoring and delivery matrix](delivery-checklist.md) for required eviden
 
 `main` is the permanent integration and submission branch. Every P0–P10 delivery (including P9a/P9b) reaches it through a reviewed PR. Working branches start from updated `main`; every PR explicitly uses `main` as its base. Keep merge commits, follow-up commits and working branches. Do not squash, rebase or replace main with an unreviewed feature branch.
 
-P0 is merged into `main` through GitHub PR #1 (`1beec2a`), P1 including normalization through PR #2 (`2b7aba8`), and the remote HEAD points to `main`. P2 starts from that verified merge. The user requires Git over SSH exclusively in the terminal. Do not use `gh` or change the working remote to HTTPS. For P2:
+P0 is merged into `main` through GitHub PR #1 (`1beec2a`), P1 including normalization through PR #2 (`2b7aba8`), P2 through PR #3 (`9295e76`), and the remote HEAD points to `main`. P3 starts from that verified merge on `feat/seed`. The user requires Git over SSH exclusively in the terminal. Do not use `gh` or change the working remote to HTTPS. For P2:
 
 ```sh
 git switch main
@@ -35,7 +35,7 @@ git switch -c feat/quality-criteria
 git push -u origin feat/quality-criteria
 ```
 
-The agent prepares a [PR description](P2-pr.md) and the [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/quality-criteria); the author creates the PR on GitHub with base `main`, writes their review there and merges with a merge commit after corrections. This is an explicit workflow adaptation to the user's Git-only requirement; it does not replace human review with an agent's self-check. Keep the branch. The author committed P1's normalization correction as `ae05513`; it is included in the verified P1 merge. P2 is implemented on its separate branch; P3 must wait for the next independent prompt.
+The agent prepares a [PR description](P2-pr.md) and the [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/quality-criteria); the author creates the PR on GitHub with base `main`, writes their review there and merges with a merge commit after corrections. This is an explicit workflow adaptation to the user's Git-only requirement; it does not replace human review with an agent's self-check. Keep the branch. The author committed P1's normalization correction as `ae05513`; it is included in the verified P1 merge. P3 is implemented on `feat/seed` ([PR description](P3-pr.md), [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/seed)); P4 must wait for the next independent prompt.
 
 Keep README.md in Spanish and English with equivalent setup instructions, status, seed/role guidance, actual-time accounting and submission requirements. Maintain the scoring and delivery checklist against the PDF, without declaring unfinished requirements complete.
 
@@ -51,7 +51,7 @@ Use this contract for each new task, replacing `P…` with the entry below:
 | 2 | P9a: custom visual foundations | `feat/design-tokens` | Theme, type scale and reading typography |
 | 3 | P1: brands, people, memberships and replies | `feat/data-model` | Migration, constraints, indexes, default-deny RLS |
 | 4 | P2: brand-relative criteria and severity | `feat/quality-criteria` (separate PR) | Tags/reviews model; migration reruns |
-| 5 | P3: credible demo dataset | `feat/seed` | Three brands, two leads, three specialists and relative dates |
+| 5 | P3: credible demo dataset | `feat/seed` | Three brands, two leads, three specialists and relative dates. No new dependencies: `node scripts/seed.ts` with `fetch` (user decision) |
 | 6 | P4: server authorization and user switching | `feat/authz` | Direct API/database checks, including same-brand privacy |
 | 7 | P5: review queue and coverage | `feat/review-queue` | Per-brand prioritization and distinct lead queues |
 | 8 | P6: contextual review workspace | `feat/review-workspace` | Atomic save, valid tags and next reply |
