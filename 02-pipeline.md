@@ -277,6 +277,8 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 **Hecho cuando:** Marta revisa 5 respuestas seguidas sin tocar el mouse más de lo necesario.
 
+*Implementado:* función `submit_review` `security invoker`; validación manual en lugar de `zod` (sin dependencias nuevas); atajo extra `C` para el comentario y «Skip for now». El formulario va bajo la carta y el procedimiento queda fijo al lado, para no perderlo de vista al puntuar.
+
 **Qué revisar en el PR:** `reviewer_id` que venga del formulario, inserción de revisión y etiquetas sin transacción (usar una función RPC si hace falta), aceptar etiquetas de otra marca.
 
 ---
@@ -409,7 +411,12 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/authz` / GitHub PR #5 | `020de45` | RLS por asignación de marca, sesión real sin dependencias, capa de datos y `authz-check` | P4 | Ver `ai-logs/P4.md` | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #5 | `5e93c3b` | Integración de P4 mediante merge commit | P4 | Autor verificó el funcionamiento; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
 
-**Entrega P5:** `feat/review-queue` parte de `5e93c3b`; vistas `review_queue` y `review_coverage` (`security_invoker`, solo líderes), página `/review` agrupada por marca con cobertura por especialista y estados vacíos, portada que lleva al líder a su cola, `review_queue.test.sql` y tres casos nuevos en `authz-check`. También cierra pendientes de P3/P4 por instrucción del usuario. Registro en `ai-logs/P5.md`; descripción de PR en `docs/P5-pr.md`. P6 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
+**Entrega P5:** `feat/review-queue` parte de `5e93c3b`; vistas `review_queue` y `review_coverage` (`security_invoker`, solo líderes), página `/review` agrupada por marca con cobertura por especialista y estados vacíos, portada que lleva al líder a su cola, `review_queue.test.sql` y tres casos nuevos en `authz-check`. También cierra pendientes de P3/P4 por instrucción del usuario. Registro en `ai-logs/P5.md`; descripción de PR en `docs/P5-pr.md`. Publicado como `c00ca3f`.
+
+| 2026-09-25 | `feat/review-queue` / GitHub PR #6 | `c00ca3f` | Cola por marca con cobertura por especialista; pendientes P3/P4 | P5 | Ver `ai-logs/P5.md` | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #6 | `26f13f6` | Integración de P5 mediante merge commit | P5 | Autor revisó el funcionamiento; señaló el recorte de contenido en la cola | Ver `docs/time-log.md` |
+
+**Entrega P6:** `feat/review-workspace` parte de `26f13f6`; `submit_review` atómica (`security invoker`, sin parámetro de revisor), `/review/[replyId]` con carta, procedimiento fijo, etiquetas por severidad, atajos y `useActionState`; corrección de la vista previa de la cola; tema daisyUI y fuentes (adelanta P9a). Registro en `ai-logs/P6.md`; descripción de PR en `docs/P6-pr.md`. P7 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
 
 ### Plantilla de revisión para cada PR
 

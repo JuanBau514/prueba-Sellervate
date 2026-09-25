@@ -7,33 +7,42 @@ import type { Viewer } from '@/lib/data/viewer';
 export function UserSwitcher({ viewer }: { viewer: Viewer | null }) {
   const currentKey = viewer?.email.split('@')[0] ?? '';
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm">
+    <div className="flex flex-wrap items-center gap-2">
       <form action={switchUser} className="flex items-center gap-2">
-        <label htmlFor="account" className="text-neutral-600">
+        <label htmlFor="account" className="text-xs text-muted">
           Viewing as
         </label>
         <select
           id="account"
           name="account"
           defaultValue={currentKey}
-          className="select select-sm select-bordered w-52"
+          className="select select-sm w-56 bg-sheet text-sm"
         >
           <option value="" disabled>
             Choose a person
           </option>
-          {demoAccounts.map((account) => (
-            <option key={account.key} value={account.key}>
-              {account.name} · {account.role}
-            </option>
-          ))}
+          <optgroup label="Team leads">
+            {demoAccounts.filter((account) => account.role === 'Lead').map((account) => (
+              <option key={account.key} value={account.key}>
+                {account.name}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Specialists">
+            {demoAccounts.filter((account) => account.role === 'Specialist').map((account) => (
+              <option key={account.key} value={account.key}>
+                {account.name}
+              </option>
+            ))}
+          </optgroup>
         </select>
-        <button type="submit" className="btn btn-sm">
+        <button type="submit" className="btn btn-sm btn-primary">
           Switch
         </button>
       </form>
       {viewer && (
         <form action={signOut}>
-          <button type="submit" className="btn btn-sm btn-ghost">
+          <button type="submit" className="btn btn-sm btn-ghost font-normal text-muted">
             Sign out
           </button>
         </form>

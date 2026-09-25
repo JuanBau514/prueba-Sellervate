@@ -150,6 +150,24 @@ async function main() {
   });
   check(impersonated.status >= 400, 'reviewer_id must be the session user; a lead cannot sign as someone else', `status ${impersonated.status}`);
 
+  console.log('\nReview submission (submit_review RPC)');
+  const submit = (token: string, args: object) =>
+    rest(token, 'rpc/submit_review', { method: 'POST', body: JSON.stringify(args) });
+
+  const daniSubmit = await submit(dani.token, { p_reply_id: ownReply, p_score: 4, p_comment: 'Self-review' });
+  check(daniSubmit.status >= 400, 'A specialist cannot submit a review through the RPC', `status ${daniSubmit.status}`);
+
+  const crossSubmit = await submit(marta.token, { p_reply_id: brisaReply, p_score: 1, p_comment: 'Not my brand' });
+  check(crossSubmit.status >= 400, "A lead cannot submit a review for another lead's brand", `status ${crossSubmit.status}`);
+
+  const voltiaTag = String((await rest(marta.token, `issue_tags?select=id&brand_id=eq.${voltia}&limit=1`)).rows[0]?.id ?? '');
+  const mixed = await submit(marta.token, {
+    p_reply_id: unreviewedCaja, p_score: 2, p_comment: 'Wrong brand tag', p_tag_ids: [voltiaTag],
+  });
+  const leftover = await rest(marta.token, `reviews?select=id&reply_id=eq.${unreviewedCaja}`);
+  check(mixed.status >= 400 && leftover.rows.length === 0,
+    "A tag from another brand rejects the whole submission; no partial review is left", `status ${mixed.status}, ${leftover.rows.length} reviews`);
+
   console.log(`\nApplication route (${appUrl})`);
   const appGet = async (id: string, token: string | null) => {
     try {

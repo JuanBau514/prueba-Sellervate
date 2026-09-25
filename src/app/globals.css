@@ -4,9 +4,75 @@
   logs: false;
 }
 
-/* The custom theme and typography are the next independent task: P9a. */
+/* Colour means something or it does not appear. Red, amber and slate are
+   reserved for severity; the green accent is the reviewer's ink. */
+@plugin "daisyui/theme" {
+  name: "sellervate";
+  default: true;
+  color-scheme: light;
+  --color-base-100: #f4f6f5; /* paper */
+  --color-base-200: #e8ecea;
+  --color-base-300: #d3dbd8;
+  --color-base-content: #1d252c; /* ink */
+  --color-primary: #2e5e55; /* accent: actions and selection */
+  --color-primary-content: #ffffff;
+  --color-secondary: #1d252c;
+  --color-secondary-content: #ffffff;
+  --color-accent: #2e5e55;
+  --color-accent-content: #ffffff;
+  --color-neutral: #1d252c;
+  --color-neutral-content: #f4f6f5;
+  --color-info: #2e5e55;
+  --color-info-content: #ffffff;
+  --color-success: #2e5e55;
+  --color-success-content: #ffffff;
+  --color-warning: #b54708;
+  --color-warning-content: #ffffff;
+  --color-error: #b42318;
+  --color-error-content: #ffffff;
+  --radius-selector: 0.25rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-literata), ui-serif, Georgia, serif;
+
+  /* Type scale: 13 / 15 / 17 / 21 / 28 px. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.45rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.7rem;
+  --text-lg: 1.3125rem;
+  --text-lg--line-height: 1.8rem;
+  --text-xl: 1.75rem;
+  --text-xl--line-height: 2.2rem;
+
+  --color-sheet: #ffffff;
+  --color-muted: #5b6776;
+  --color-rule: #d3dbd8;
+  --color-critical: #b42318;
+  --color-major: #b54708;
+  --color-minor: #5b6776;
+}
+
 body {
-  background: #fff;
-  color: #1d252c;
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-base-100);
+  color: var(--color-base-content);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
