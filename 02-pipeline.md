@@ -224,6 +224,8 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 **Hecho cuando:** `npm run authz-check` pasa, y cambiar de usuario cambia lo que se ve.
 
+*Implementado:* sin dependencias nuevas, `@supabase/ssr` se sustituye por `fetch` a Auth/REST, cookies httpOnly y renovación del token en `src/proxy.ts`. `people` se limita a quienes comparten una marca (más estricto que «todo el personal»).
+
 **Qué revisar en el PR (el más importante):**
 - service role en cualquier archivo bajo `src/`;
 - políticas que miran solo `people.role` sin exigir la asignación correspondiente en `brand_memberships`; el rol ya no se duplica en las membresías;
@@ -395,7 +397,12 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/quality-criteria` / GitHub PR #3 | `bcc91ef` | Criterios por marca con severidad, revisiones, etiquetas e intervenciones; 110 aserciones | P2 | Ver `ai-logs/P2.md` | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #3 | `9295e76` | Integración de P2 mediante merge commit | P2 | Confirmado por Git; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
 
-**Entrega P3:** `feat/seed` parte de `9295e76`; `scripts/seed.ts` sin dependencias nuevas (Node nativo + `fetch`), 5 cuentas, 3 marcas, 42 respuestas y 27 revisiones con fechas relativas; pruebas de P1/P2 acotadas a sus fixtures para pasar con datos sembrados. Registro en `ai-logs/P3.md`; descripción de PR en `docs/P3-pr.md`. P4 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
+**Entrega P3:** `feat/seed` parte de `9295e76`; `scripts/seed.ts` sin dependencias nuevas (Node nativo + `fetch`), 5 cuentas, 3 marcas, 42 respuestas y 27 revisiones con fechas relativas; pruebas de P1/P2 acotadas a sus fixtures para pasar con datos sembrados. Registro en `ai-logs/P3.md`; descripción de PR en `docs/P3-pr.md`. Publicado como `c4aed98`.
+
+| 2026-09-25 | `feat/seed` / GitHub PR #4 | `c4aed98` | Seed creíble sin dependencias nuevas; pruebas acotadas a fixtures | P3 | Ver `ai-logs/P3.md` | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #4 | `f2766c1` | Integración de P3 mediante merge commit | P3 | Confirmado por Git; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
+
+**Entrega P4:** `feat/authz` parte de `f2766c1`; migración de políticas RLS con helpers `security definer`, sesión real con cookies httpOnly y renovación en `src/proxy.ts` (sin `@supabase/ssr`), capa `src/lib/data/*`, selector de usuario, `GET /api/replies/[id]`, `authorization.test.sql` y `npm run authz-check`. Registro en `ai-logs/P4.md`; descripción de PR en `docs/P4-pr.md`. P5 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
 
 ### Plantilla de revisión para cada PR
 

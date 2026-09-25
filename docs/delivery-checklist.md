@@ -6,14 +6,14 @@ Fuente: PDF local «Sellervate-Technical-Exercise (1).pdf», especialmente pági
 
 | Dimensión del PDF | Peso | Evidencia que debemos producir | Problemas | Estado actual |
 | --- | ---: | --- | --- | --- |
-| How you worked · Forma de trabajo | 24 | PR pequeños del agente, revisión escrita real del autor antes del merge, correcciones en la misma rama, historial y ramas intactos | Todos | P0, P1 y P2 integrados mediante PR #1/#2/#3; P3 en `feat/seed` desde main, PR pendiente. Verificación final de comentarios de revisión pendiente |
+| How you worked · Forma de trabajo | 24 | PR pequeños del agente, revisión escrita real del autor antes del merge, correcciones en la misma rama, historial y ramas intactos | Todos | P0–P3 integrados mediante PR #1–#4; P4 en `feat/authz` desde main, PR pendiente. Verificación final de comentarios de revisión pendiente |
 | Problem interpretation and prioritisation · Interpretación y prioridades | 18 | Problema central, elección del loop de revisión, supuestos y recortes defendibles en DECISIONS.md | P0, P10 | Interpretación y pipeline escritos; decisiones finales pendientes |
-| Architecture and code · Arquitectura y código | 13 | Separación de responsabilidades, código legible, lecturas en servidor y flujo completo | P0, P4–P8 | Base técnica y migraciones P1/P2; flujo de aplicación pendiente |
+| Architecture and code · Arquitectura y código | 13 | Separación de responsabilidades, código legible, lecturas en servidor y flujo completo | P0, P4–P8 | Base técnica, migraciones P1/P2/P4 y capa de datos `server-only` con JWT del usuario (P4); flujo de producto pendiente |
 | Data model · Modelo de datos | 12 | Entidades y relaciones coherentes, integridad, migraciones e importación futura posible | P1–P3 | P1 normalizado integrado; P2 conserva 3FN, añade criterios/revisiones e integridad entre marcas. 110 aserciones pasan (con base vacía y sembrada) y lint SQL sin errores. P3: seed con 42 respuestas y 27 revisiones que respeta todas las restricciones, incluidas etiquetas por marca y revisor líder asignado |
-| Security and tenant isolation · Seguridad y aislamiento | 10 | Autorización en servidor; pruebas directas entre marcas y entre especialistas, sin depender de ocultar botones | P4, P6–P8 | Ocho tablas con RLS activo y acceso cerrado; etiquetas ajenas rechazadas incluso con service_role. Políticas y pruebas de autorización funcional de P4 pendientes |
+| Security and tenant isolation · Seguridad y aislamiento | 10 | Autorización en servidor; pruebas directas entre marcas y entre especialistas, sin depender de ocultar botones | P4, P6–P8 | P4 en `feat/authz`: políticas RLS por asignación de marca, especialista solo lo propio, `reviewer_id = auth.uid()`, `anon` sin privilegios. 130 aserciones pgTAP y `npm run authz-check` (16 casos por PostgREST y ruta de la app, 404 para lo ajeno) pasan. Pendiente de revisión humana; P6–P8 deben conservarlo |
 | Interface and visual craft · Interfaz y diseño | 10 | Escala tipográfica, sistema de color explicable, estados de carga/vacío/error y recorrido comprensible | P9a, P5–P9b | Pendiente; P0 es solo una página mínima |
 | Decisions document · Documento de decisiones | 8 | DECISIONS.md breve y defendible, con todos los apartados del brief | P10, actualizado con decisiones reales | Pendiente |
-| Ground covered in six hours · Alcance en seis horas | 5 | Producto coherente de extremo a extremo dentro del límite, con estado y horas reales | Todos | P0–P3; tiempo efectivo acumulado sin confirmar |
+| Ground covered in six hours · Alcance en seis horas | 5 | Producto coherente de extremo a extremo dentro del límite, con estado y horas reales | Todos | P0–P4; tiempo efectivo acumulado sin confirmar |
 | **Total** | **100** | | | |
 
 Los dos primeros criterios suman 42 puntos: reservar tiempo para decidir, revisar y documentar. El brief considera suficientes cuatro o cinco PR reales; los once del pipeline son nuestra organización inicial, no una exigencia del evaluador. No se evalúan cobertura exhaustiva, despliegue, perfección de casos extremos ni ausencia total de asperezas. No gastar el presupuesto en esas áreas a costa del flujo principal.
@@ -23,11 +23,11 @@ Los dos primeros criterios suman 42 puntos: reservar tiempo para decidir, revisa
 - [x] Base Next.js App Router + TypeScript y Tailwind; daisyUI elegido como complemento opcional.
 - [x] Supabase local inicia y aplica las migraciones de P1/P2; falta su uso por el producto.
 - [ ] Monorepo público en GitHub con historial, ramas y PR conservados. El repositorio público existe; el proceso de PR aún no está completado.
-- [ ] Datos inventados: mínimo dos marcas, tres especialistas, dos líderes y suficientes revisiones para que el promedio signifique algo. P3 en `feat/seed`: tres marcas, dos líderes, tres especialistas, 42 respuestas, 27 revisiones; verificado con `db reset` + seed y consultas SQL. Se marcará al integrarse en main.
-- [ ] Forma de entrar como cada rol. Login simulado permitido; autorización en servidor obligatoria.
+- [ ] Datos inventados: mínimo dos marcas, tres especialistas, dos líderes y suficientes revisiones para que el promedio signifique algo. P3 en `feat/seed`: tres marcas, dos líderes, tres especialistas, 42 respuestas, 27 revisiones; verificado con `db reset` + seed y consultas SQL; integrado en main mediante PR #4.
+- [ ] Forma de entrar como cada rol. Login simulado permitido; autorización en servidor obligatoria. P4 en `feat/authz`: selector «Viewing as» con sesión real de Supabase Auth y RLS; verificado con envíos de formulario y `authz-check`. Se marcará al integrarse en main.
 - [ ] Respuestas creíbles, voces distintas por marca y al menos un caso claramente malo. P3 incluye tres voces y la devolución sin diagnóstico (puntaje 1); pendiente de revisión humana en el PR y de verse en pantallas.
 - [ ] Diseño intencional: consultar sellervate.com como referencia, sin copiar; tipografía, color y estados explicables. La referencia visual se revisará en P9a.
-- [x] Prompts y registros de P0, P1, P2 y P3 incluidos; continuar conservando los siguientes.
+- [x] Prompts y registros de P0–P4 incluidos; continuar conservando los siguientes.
 - [ ] Recorrido de producto funcional de extremo a extremo y alcance recortado explícitamente cuando corresponda.
 
 ## DECISIONS.md · Máximo dos páginas
@@ -61,6 +61,6 @@ La evaluación lee PR y DECISIONS.md antes de ejecutar el producto. Si hay entre
 
 ## Estado remoto y siguiente acción
 
-Actualizado al iniciar P3: `git fetch origin` confirma `main` en el merge de P2 mediante GitHub PR #3 (`9295e76`). `feat/seed` se creó desde ese merge y contiene P3 implementado y verificado localmente.
+Actualizado al iniciar P4: `git fetch origin` confirma `main` en el merge de P3 mediante GitHub PR #4 (`f2766c1`). `feat/authz` se creó desde ese merge y contiene P4 implementado y verificado localmente.
 
-Siguiente acción: revisar el PR de P3 hacia `main`, con [descripción preparada](P3-pr.md), antes de integrar mediante merge commit. Usar exclusivamente Git por SSH en la terminal y la web de GitHub para revisar e integrar el PR. El procedimiento está en [el acuerdo de ejecución](implementation-plan.md#main-as-the-integration-and-delivery-branch). La comprobación final del contenido de las revisiones humanas sigue pendiente; un merge por sí solo no prueba esa revisión. P4 no se inicia en esta entrega.
+Siguiente acción: revisar el PR de P4 hacia `main`, con [descripción preparada](P4-pr.md), antes de integrar mediante merge commit. Usar exclusivamente Git por SSH en la terminal y la web de GitHub para revisar e integrar el PR. El procedimiento está en [el acuerdo de ejecución](implementation-plan.md#main-as-the-integration-and-delivery-branch). La comprobación final del contenido de las revisiones humanas sigue pendiente; un merge por sí solo no prueba esa revisión. P5 no se inicia en esta entrega.

@@ -77,3 +77,11 @@ Referencias: [restricciones de PostgreSQL 17](https://www.postgresql.org/docs/17
 ## P3 · Datos de demostración
 
 `scripts/seed.ts` escribe con la service role key y pasa por las mismas restricciones y triggers que cualquier escritura: autor especialista asignado, revisor líder asignado, etiqueta global o de la marca revisada. `external_id` sigue el patrón `<slug>-NNN` con `source = 'seed'`, de modo que un importador real (`source = 'helpdesk'`) no colisiona. Las revisiones fijan `created_at = updated_at` en el pasado para que las tendencias tengan historia; el trigger `touch_review` solo actúa en UPDATE.
+
+## P4 · Autorización
+
+`20260925170000_authorization.sql` abre el acceso solo mediante políticas. Tres helpers en `private` (`is_brand_member`, `is_brand_lead`, `shares_brand_with`) usan `SECURITY DEFINER`, `search_path = ''` y solo responden sobre `auth.uid()`; evitan la recursión de políticas sobre `brand_memberships`. `private` no está expuesto por PostgREST; `authenticated` recibe `USAGE` y `EXECUTE` solo sobre esos tres.
+
+Privilegios: `SELECT` en las ocho tablas; `INSERT (reply_id, reviewer_id, score, comment, is_example)` y `UPDATE (score, comment, is_example)` en `reviews`; `INSERT/DELETE` en `review_tags`; `INSERT` de columnas de negocio en `brand_changes`. Sin borrado de revisiones, sin escritura de respuestas, marcas, asignaciones ni criterios desde la API. `anon` no tiene nada.
+
+Las escrituras pasan dos capas: los triggers de P2 (líder asignado, etiqueta de la marca) se ejecutan antes y RLS exige además que el autor sea el usuario de la sesión y siga asignado. Retirar una asignación corta el acceso de inmediato; las revisiones históricas se conservan. Un colíder puede leer, pero no editar, las revisiones de otro líder de la misma marca.

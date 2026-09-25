@@ -137,14 +137,15 @@ select hasnt_column('public', 'review_tags', 'brand_id', 'Join table does not du
 select is((select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public' and c.relname in ('issue_tags', 'reviews', 'review_tags', 'brand_changes') and c.relrowsecurity),
   4::bigint, 'All P2 tables enable RLS');
-select is((select count(*) from pg_policies where schemaname = 'public'
-  and tablename in ('issue_tags', 'reviews', 'review_tags', 'brand_changes')),
-  0::bigint, 'No access policies are opened before P4');
 select ok(not exists (
-  select 1 from (values ('anon'), ('authenticated')) as roles(name)
-  cross join (values ('issue_tags'), ('reviews'), ('review_tags'), ('brand_changes')) as tables(name)
-  where has_table_privilege(roles.name, 'public.' || tables.name, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
-), 'API roles have no P2 table privileges');
+  select 1 from (values ('issue_tags'), ('reviews'), ('review_tags'), ('brand_changes')) as tables(name)
+  where has_table_privilege('anon', 'public.' || tables.name, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
+), 'Anonymous users have no P2 table privileges');
+select ok(not has_table_privilege('authenticated', 'public.reviews', 'DELETE')
+  and not has_table_privilege('authenticated', 'public.issue_tags', 'INSERT, UPDATE, DELETE')
+  and not has_column_privilege('authenticated', 'public.reviews', 'reviewer_id', 'UPDATE')
+  and not has_column_privilege('authenticated', 'public.reviews', 'reply_id', 'UPDATE'),
+  'Signed-in users cannot delete reviews, edit criteria or reassign review identity');
 select ok(not exists (
   select 1 from (values ('anon'), ('authenticated'), ('service_role')) as roles(name)
   cross join (values ('private.keep_quality_identity()'), ('private.check_quality_lead()'),
@@ -152,30 +153,10 @@ select ok(not exists (
   where has_function_privilege(roles.name, funcs.name, 'EXECUTE')
 ), 'Internal trigger functions cannot be executed directly by API roles');
 
-grant select, insert, update, delete on public.issue_tags, public.reviews,
-  public.review_tags, public.brand_changes to anon, authenticated;
 set local role anon;
-select is((select count(*) from public.issue_tags), 0::bigint, 'RLS hides criteria from anonymous users');
-select is((select count(*) from public.reviews), 0::bigint, 'RLS hides reviews from anonymous users');
-select is((select count(*) from public.review_tags), 0::bigint, 'RLS hides review tags from anonymous users');
-select is((select count(*) from public.brand_changes), 0::bigint, 'RLS hides brand changes from anonymous users');
+select throws_ok($$ select count(*) from public.reviews $$, '42501', null, 'Anonymous cannot read reviews');
 select throws_ok($$ insert into public.issue_tags (code, label, severity) values ('forbidden', 'Forbidden', 'minor'); $$,
-  '42501', null, 'Anonymous inserts fail even with transaction-only table grants');
-reset role;
-select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000003', true);
-set local role authenticated;
-select is((select count(*) from public.issue_tags), 0::bigint, 'Authenticated criteria access stays closed until P4');
-select is((select count(*) from public.reviews), 0::bigint, 'Authenticated review access stays closed until P4');
-select is((select count(*) from public.review_tags), 0::bigint, 'Authenticated review-tag access stays closed until P4');
-select is((select count(*) from public.brand_changes), 0::bigint, 'Authenticated brand-change access stays closed until P4');
-select throws_ok($$
-  insert into public.brand_changes (brand_id, author_id, happened_on, note)
-  values ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000003', current_date, 'Valid lead, no policy');
-$$, '42501', null, 'A legitimate lead cannot write through RLS before P4');
-select results_eq($$ update public.reviews set score = 1 returning id $$,
-  $$ select null::uuid where false $$, 'RLS blocks review edits');
-select results_eq($$ delete from public.review_tags returning review_id $$,
-  $$ select null::uuid where false $$, 'RLS blocks removing review tags');
+  '42501', null, 'Anonymous cannot create criteria');
 reset role;
 select lives_ok($$ delete from public.reviews where id = '50000000-0000-0000-0000-000000000001'; $$,
   'Explicit admin review deletion removes dependent join rows only');
