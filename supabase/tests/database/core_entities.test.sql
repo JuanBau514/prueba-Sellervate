@@ -136,23 +136,21 @@ select ok(not exists (
   where has_function_privilege(roles.name, funcs.name, 'EXECUTE')
 ), 'Internal trigger functions are not directly executable by API roles');
 
--- Verify both protections independently: table privileges and RLS. P4 must
--- replace this baseline with positive/negative tests for its actual policies.
+-- RLS stays enabled; P4 opens reads through policies (see authorization.test.sql).
 select is((
   select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
   where n.nspname = 'public' and c.relname in ('people', 'brands', 'brand_memberships', 'replies')
     and c.relrowsecurity
 ), 4::bigint, 'All four tables enable RLS');
-select is((
-  select count(*) from pg_policies
-  where schemaname = 'public' and tablename in ('people', 'brands', 'brand_memberships', 'replies')
-), 0::bigint, 'P1 introduces no permissive policies before P4');
 select ok(not exists (
-  select 1 from (values ('anon'), ('authenticated')) as roles(name)
-  cross join (values ('people'), ('brands'), ('brand_memberships'), ('replies')) as tables(name)
-  where has_table_privilege(roles.name, 'public.' || tables.name,
+  select 1 from (values ('people'), ('brands'), ('brand_memberships'), ('replies')) as tables(name)
+  where has_table_privilege('anon', 'public.' || tables.name,
     'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
-), 'API roles have no application table privileges yet');
+), 'Anonymous users have no table privileges');
+select ok(not exists (
+  select 1 from (values ('people'), ('brands'), ('brand_memberships'), ('replies')) as tables(name)
+  where has_table_privilege('authenticated', 'public.' || tables.name, 'INSERT, UPDATE, DELETE, TRUNCATE')
+), 'Signed-in users cannot write P1 tables');
 
 -- The seed uses service_role; author integrity must survive its RLS bypass.
 set local role service_role;
@@ -170,39 +168,25 @@ reset role;
 delete from public.replies where brand_id = '20000000-0000-0000-0000-000000000001'
   and source = 'seed' and external_id = 'service-fixture';
 
--- Grant only inside this rolled-back transaction to prove that RLS itself
--- denies access even if table privileges were accidentally reintroduced.
-grant select, insert, update, delete on public.people, public.brands,
-  public.brand_memberships, public.replies to anon, authenticated;
-
 set local role anon;
-select is((select count(*) from public.people), 0::bigint, 'Anonymous cannot read profiles');
-select is((select count(*) from public.brands), 0::bigint, 'Anonymous cannot read brands');
-select is((select count(*) from public.brand_memberships), 0::bigint, 'Anonymous cannot read assignments');
-select is((select count(*) from public.replies), 0::bigint, 'Anonymous cannot read replies');
+select throws_ok($$ select count(*) from public.replies $$, '42501', null, 'Anonymous cannot read replies');
+select throws_ok($$ select count(*) from public.people $$, '42501', null, 'Anonymous cannot read profiles');
 select throws_ok($$
   insert into public.brands (slug, name, voice_summary, procedures_md)
   values ('forbidden', 'Forbidden', 'Short', 'Check the order.');
-$$, '42501', null, 'RLS rejects anonymous writes even with an INSERT grant');
+$$, '42501', null, 'Anonymous cannot write');
 reset role;
 
-select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000001', true);
+select set_config('request.jwt.claims', '{"sub":"10000000-0000-0000-0000-000000000001","role":"authenticated"}', true);
 set local role authenticated;
-select is((select count(*) from public.people), 0::bigint, 'Authenticated cannot read profiles before P4');
-select is((select count(*) from public.brands), 0::bigint, 'Authenticated cannot read brands before P4');
-select is((select count(*) from public.brand_memberships), 0::bigint, 'Authenticated cannot read assignments before P4');
-select is((select count(*) from public.replies), 0::bigint, 'Authenticated cannot read even their own replies before P4');
 select throws_ok($$
   insert into public.replies (brand_id, specialist_id, customer_message, body, sent_at, external_id)
   values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
     'Help', 'Please describe the problem.', now(), 'forbidden');
-$$, '42501', null, 'RLS rejects authenticated writes even for a valid membership');
-select results_eq($$ update public.replies set body = 'Changed' returning id $$,
-  $$ select null::uuid where false $$, 'RLS hides rows from authenticated updates');
-select results_eq($$ delete from public.replies returning id $$,
-  $$ select null::uuid where false $$, 'RLS hides rows from authenticated deletes');
+$$, '42501', null, 'Specialists cannot create replies through the API (imports only)');
+select throws_ok($$ delete from public.replies $$, '42501', null, 'Replies cannot be deleted through the API');
 reset role;
 
-select is((select count(*) from public.replies where brand_id::text like '20000000-%'), 3::bigint, 'Denied deletes preserve all replies');
+select is((select count(*) from public.replies where brand_id::text like '20000000-%'), 3::bigint, 'Denied writes preserve all replies');
 select * from finish();
 rollback;
