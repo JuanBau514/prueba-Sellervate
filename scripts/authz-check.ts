@@ -172,6 +172,17 @@ async function main() {
   check(mixed.status >= 400 && leftover.rows.length === 0,
     "A tag from another brand rejects the whole submission; no partial review is left", `status ${mixed.status}, ${leftover.rows.length} reviews`);
 
+  console.log('\nBrand evidence');
+  const daniEvidence = await rest(dani.token, 'brand_weekly_scores?select=brand_id');
+  check(daniEvidence.rows.length === 0, 'Specialists get no brand evidence views', `${daniEvidence.rows.length} rows`);
+  const nuriaVoltiaEvidence = await rest(nuria.token, `brand_issue_patterns?select=brand_id&brand_id=eq.${voltia}`);
+  check(nuriaVoltiaEvidence.rows.length === 0, "Nuria gets no evidence for Marta's brand", `${nuriaVoltiaEvidence.rows.length} rows`);
+  const spoofedChange = await rest(marta.token, 'brand_changes', {
+    method: 'POST',
+    body: JSON.stringify({ brand_id: voltia, author_id: nuria.id, happened_on: new Date().toISOString().slice(0, 10), note: 'Signed as Nuria' }),
+  });
+  check(spoofedChange.status >= 400, 'The author of a brand change cannot be supplied by the client', `status ${spoofedChange.status}`);
+
   console.log(`\nApplication route (${appUrl})`);
   const appGet = async (id: string, token: string | null) => {
     try {
@@ -200,6 +211,14 @@ async function main() {
   const meHtml = await mePage.text();
   check(mePage.status === 200 && luciaComment !== '' && !meHtml.includes(luciaComment.slice(0, 40).replace(/&/g, '&amp;')),
     "GET /me as Dani → 200 without a colleague's feedback", `status ${mePage.status}`);
+
+  const brandPage = async (token: string) =>
+    (await fetch(`${appUrl}/brands/voltia`, { headers: { Cookie: `${accessCookie}=${token}` }, redirect: 'manual' })).status;
+  const martaBrand = await brandPage(marta.token);
+  const nuriaBrand = await brandPage(nuria.token);
+  const daniBrand = await brandPage(dani.token);
+  check(martaBrand === 200 && nuriaBrand === 404 && daniBrand === 404,
+    'GET /brands/voltia → 200 for its lead, 404 for another lead and for a specialist', `${martaBrand}/${nuriaBrand}/${daniBrand}`);
 
   console.log(failures === 0 ? '\nauthz-check: all checks passed.' : `\nauthz-check: ${failures} check(s) failed.`);
   process.exit(failures === 0 ? 0 : 1);

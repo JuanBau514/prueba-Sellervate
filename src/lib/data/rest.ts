@@ -32,6 +32,31 @@ export async function select<T>(path: string): Promise<T[]> {
 
 export type RpcResult<T> = { ok: true; data: T } | { ok: false; status: number; code: string; message: string };
 
+/** Inserts rows as the signed-in user; RLS and column grants decide what is allowed. */
+export async function insert(table: string, row: object): Promise<RpcResult<null>> {
+  const token = await getAccessToken();
+  if (!token) throw new SignedOutError();
+
+  const { url, anonKey } = supabaseConfig();
+  const response = await fetch(`${url}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      apikey: anonKey,
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify(row),
+    cache: 'no-store',
+  });
+  if (response.status === 401) throw new SignedOutError();
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    return { ok: false, status: response.status, code: body?.code ?? '', message: body?.message ?? '' };
+  }
+  return { ok: true, data: null };
+}
+
 /**
  * Calls a Postgres function as the signed-in user. Errors are returned, not
  * thrown, so callers can turn database codes into interface copy.

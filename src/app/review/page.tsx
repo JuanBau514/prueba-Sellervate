@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { listBrands, type Brand } from "@/lib/data/brands";
 import { listCoverage, listQueue, type Coverage, type QueueItem } from "@/lib/data/queue";
 import { getViewer } from "@/lib/data/viewer";
 
@@ -18,13 +19,14 @@ const isGap = (days: number | null) => days === null || days >= 7;
 /** Collapses line breaks so a preview shows content, not a greeting and a blank line. */
 const preview = (text: string) => text.replace(/\s*\n+\s*/g, " ").trim();
 
-type BrandGroup = { id: string; name: string; coverage: Coverage[]; items: QueueItem[] };
+type BrandGroup = { id: string; name: string; slug: string; coverage: Coverage[]; items: QueueItem[] };
 
 // Groups already-ordered rows; the order itself comes from SQL.
-function groupByBrand(coverage: Coverage[], items: QueueItem[]): BrandGroup[] {
+function groupByBrand(brands: Brand[], coverage: Coverage[], items: QueueItem[]): BrandGroup[] {
+  const slugs = new Map(brands.map((brand) => [brand.id, brand.slug]));
   const groups = new Map<string, BrandGroup>();
   for (const row of coverage) {
-    const group = groups.get(row.brand_id) ?? { id: row.brand_id, name: row.brand_name, coverage: [], items: [] };
+    const group = groups.get(row.brand_id) ?? { id: row.brand_id, name: row.brand_name, slug: slugs.get(row.brand_id) ?? "", coverage: [], items: [] };
     group.coverage.push(row);
     groups.set(row.brand_id, group);
   }
@@ -97,8 +99,8 @@ export default async function ReviewQueuePage({ searchParams }: PageProps<"/revi
     );
   }
 
-  const [{ saved }, coverage, items] = await Promise.all([searchParams, listCoverage(), listQueue()]);
-  const brands = groupByBrand(coverage, items);
+  const [{ saved }, brandList, coverage, items] = await Promise.all([searchParams, listBrands(), listCoverage(), listQueue()]);
+  const brands = groupByBrand(brandList, coverage, items);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -122,7 +124,12 @@ export default async function ReviewQueuePage({ searchParams }: PageProps<"/revi
             <h2 id={`brand-${brand.id}`} className="text-lg font-semibold">
               {brand.name}
             </h2>
-            <p className="text-sm text-muted">{brand.items.length} waiting</p>
+            <p className="text-sm text-muted">
+              {brand.items.length} waiting ·{" "}
+              <Link href={`/brands/${brand.slug}`} className="text-primary hover:underline">
+                Brand evidence
+              </Link>
+            </p>
           </div>
 
           <table className="mt-3 w-full text-sm" aria-label={`Review coverage in ${brand.name}`}>
