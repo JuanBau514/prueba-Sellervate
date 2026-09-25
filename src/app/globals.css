@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: false;
+  logs: false;
+}
+
+/* The custom theme and typography are the next independent task: P9a. */
+body {
+  background: #fff;
+  color: #1d252c;
+  font-family: Arial, Helvetica, sans-serif;
+}

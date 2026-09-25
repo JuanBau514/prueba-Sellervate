@@ -6,7 +6,9 @@
 
 ## 0. Reglas del juego
 
-### Stack (fijado por el brief)
+### Stack (restricciones del brief y elecciones del proyecto)
+
+El brief fija Next.js App Router, TypeScript, Supabase y Tailwind. daisyUI, Supabase local y las demás herramientas de la tabla son elecciones de implementación.
 
 | Capa | Herramienta | Uso |
 |---|---|---|
@@ -17,17 +19,21 @@
 | Estilos | **Tailwind + daisyUI** | Tema propio (tokens), no el tema por defecto. |
 | Gráficos | `recharts` (o SVG propio si pesa demasiado) | Tendencia por marca. |
 | Scripts | `tsx` | Seed y verificación de autorización. |
-| Flujo | **Claude Code** + `gh` CLI | Una rama por pieza de trabajo, PR, revisión escrita, merge. |
+| Flujo | **Codex** + `gh` CLI | Una rama por pieza de trabajo desde `main`, PR dirigido a `main`, revisión escrita y merge commit. El brief admite otros agentes. |
 
 ### Flujo de trabajo por PR (no negociable)
 
+**`main` es la rama principal, de integración y de entrega.** Todos los problemas P0–P10 se incorporan allí mediante PR. Debe ser también la rama predeterminada en GitHub. Conservar las ramas de trabajo para que el evaluador pueda revisar el proceso.
+
 1. `git checkout -b <rama>` desde `main` actualizado.
-2. Claude Code en **modo plan** primero; se aprueba el plan y luego implementa.
-3. Claude Code abre el PR con `gh pr create` (título y descripción con: qué problema resuelve, qué decisiones tomó).
+2. El agente presenta el plan acotado al problema; implementa dentro del alcance autorizado por el usuario y registra el prompt independiente.
+3. El agente abre el PR con `gh pr create --base main` (título y descripción con: qué problema resuelve, qué decisiones tomó y qué comprobó).
 4. **Yo leo el diff y escribo la revisión** en el PR: qué está mal, qué dejo pasar y por qué. Si está limpio, una línea.
 5. Correcciones en commits de seguimiento en la **misma rama**.
-6. Merge con **merge commit**. Nunca squash, nunca rebase.
+6. Merge **hacia `main`** con **merge commit**. Nunca squash, nunca rebase. Conservar las ramas y volver a `main` actualizado antes del siguiente problema.
 7. Actualizar la **bitácora** (sección 4) y el cronómetro.
+
+README en **español e inglés**, con contenido equivalente. Consultar la [matriz de Scoring, Delivery y Before you send it](docs/delivery-checklist.md) al cerrar cada problema. La configuración remota inicial de `main` se detalla en [el acuerdo de ejecución](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
 
 ### Estructura del repositorio
 
@@ -46,8 +52,10 @@
 │  └─ components/
 ├─ supabase/migrations/
 ├─ scripts/                       # seed.ts, authz-check.ts
-├─ docs/                          # 01-problema.md, 02-pipeline.md
-├─ ai-logs/                       # prompts y sesiones de Claude Code
+├─ docs/                          # ejecución, evaluación, entrega y tiempo
+├─ ai-logs/                       # prompts y sesiones del agente
+├─ 01-problema.md
+├─ 02-pipeline.md
 ├─ CLAUDE.md
 ├─ DECISIONS.md
 └─ README.md
@@ -322,12 +330,16 @@ brand_changes     id, brand_id, author_id, happened_on, note
 **Problema:** el documento pesa tanto como una feature y el README debe llevar a un extraño de clonar a correr en menos de diez minutos.
 
 **README:**
+En español e inglés, manteniendo ambas versiones equivalentes y usando `main` como referencia de entrega.
+
 1. Requisitos (Node, Docker, Supabase CLI).
 2. `supabase start` → `supabase db reset` → `npm run seed` → `npm run dev`.
 3. Usuarios de demo y cómo cambiar de rol.
 4. `npm run authz-check`.
 5. Horas reales.
 6. Qué testearía primero: la prueba de authz como test automatizado, y por qué no fue la mejor hora cinco.
+7. Comprobar el recorrido completo desde un clon limpio en menos de diez minutos, con seed y roles. Documentar lo realmente medido.
+8. Estado real y enlace a la lista de entrega: PR revisados, historial intacto, DECISIONS.md de máximo dos páginas, repositorio público y enlace con horas reales dentro de la propuesta de Upwork.
 
 **DECISIONS.md (máx. 2 páginas, en inglés):**
 - **Product:** problema real, qué se construyó primero, qué se dejó fuera, dónde iría un modelo, preguntas para V2.
@@ -372,8 +384,8 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 | Fecha | Rama / PR | Commit | Qué se hizo | Problema | Revisión / decisión | Tiempo acumulado |
 |---|---|---|---|---|---|---|
-| | | | Planificación: `01-problema.md` y `02-pipeline.md` | — | — | |
-| | | | | | | |
+| 2026-09-24 | `main` (base documental) | `4fe1b3a` | Versionar interpretación y pipeline originales; ignorar secretos, dependencias y PDF fuente | — | Tiempo de preparación previo pendiente de confirmar | Pendiente |
+| 2026-09-24 | `chore/scaffold` / PR pendiente de autenticación | Identificado por asunto: `chore: scaffold Next.js app and local Supabase workflow` | Base ejecutable, configuración local, reglas y prompt independiente; ver `ai-logs/P0.md` | P0 | Revisión humana pendiente; el resultado del agente no la sustituye | Ver `docs/time-log.md` |
 
 ### Plantilla de revisión para cada PR
 
