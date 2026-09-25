@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.env*
+!.env.example
+.DS_Store
+*.log
+supabase/.temp/
+supabase/.branches/
+# The supplied exercise stays local; our interpretation is versioned.
+Sellervate-Technical-Exercise*.pdf
