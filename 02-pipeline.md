@@ -435,7 +435,9 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/brand-overview` / GitHub PR #9 | `e225e64` | Evidencia por marca: tendencia con n, críticos, patrones, cobertura y cambios | P8 | Ver `ai-logs/P8.md` | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #9 | `809c6c4` | Integración de P8 mediante merge commit | P8 | Autor verificó el funcionamiento | Ver `docs/time-log.md` |
 
-**Entrega P9b:** `chore/states-polish` parte de `809c6c4`; `loading.tsx` por ruta, `error.tsx` y `global-error.tsx`, estados vacíos con acción, skip link y tablas móviles; guardas en layouts de segmento y páginas de lista en grupos de rutas para conservar 404/307 con streaming. Registro en `ai-logs/P9b.md`; descripción de PR en `docs/P9b-pr.md`.
+**Entrega P9b:** `chore/states-polish` parte de `809c6c4`; `loading.tsx` por ruta, `error.tsx` y `global-error.tsx`, estados vacíos con acción, skip link y tablas móviles; guardas en layouts de segmento y páginas de lista en grupos de rutas para conservar 404/307 con streaming. Registro en `ai-logs/P9b.md`; descripción de PR en `docs/P9b-pr.md`. Commit `821dd66`.
+
+**Entrega P10:** `docs/decisions` parte de `chore/states-polish` (ramas en cadena por decisión del autor); `DECISIONS.md` (dos páginas, dos apartados del autor en borrador), README final bilingüe, clon limpio medido (65 s con cachés calientes) y horas declaradas por el autor (6 h + 30 min). Registro en `ai-logs/P10.md`; descripción de PR en `docs/P10-pr.md`.
 
 ### Plantilla de revisión para cada PR
 

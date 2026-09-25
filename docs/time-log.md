@@ -11,7 +11,7 @@ The six-hour cap includes planning, setup, implementation and human review. Esti
 | Follow-up setup, bilingual documentation and SSH recovery | Between P0 and P1 | Before P1 | Effective time pending confirmation; no duration inferred from gaps between messages |
 | P1 after first clock reading through database verification | 2026-09-24 23:18:23 America/Bogota | 2026-09-24 23:29:34 America/Bogota | 11 min 11 sec elapsed, including permission waits; initial reading and final documentation/commit are additional, not a claimed effective total |
 
-Do not claim a final total until the user supplies the prior work duration and confirms effective time.
+Do not claim a final total until the user supplies the prior work duration and confirms effective time. The author did so in P10; see **Declared total** at the end.
 
 Normalization follow-up on 2026-09-25: recorded clock interval 10:05:05–10:13:21 America/Bogota (8 min 16 sec elapsed, including approval waits). Initial inspection and final handoff are additional. This does not include overnight gaps or claim a total of effective work. The user will perform the correction commit/push.
 
@@ -30,3 +30,11 @@ P7 on 2026-09-25: recorded clock interval 12:14:23–12:18:50 America/Bogota (me
 P8 on 2026-09-25: recorded clock interval 12:38:02–12:46:34 America/Bogota (measured interval, including approval waits), covering merge verification, evidence views and tests, brand change authorship, /brands pages with SVG trend, Chrome verification and fixes (clipped marker, severity labels, mobile chart width), authz-check extension and documentation. Publication and the author's review are additional; this is not the cumulative effective-time total.
 
 P9b on 2026-09-25: recorded clock interval 13:11:35–13:23:54 America/Bogota (measured interval, including a clarification question and approval waits), covering loading/error/empty states, the streaming status regression and its fix, Chrome and outage verification, and documentation.
+
+P10 on 2026-09-25: recorded clock interval from the end of P9b to 13:28:15 America/Bogota (measured interval, including the clean-clone run), covering the clean-clone measurement, DECISIONS.md, the final README and delivery documentation.
+
+## Declared total
+
+The author declared the effective time on 2026-09-25: **6 h** for the technical requirements (implementation, PR review and verification across P0–P10) plus **30 min** analysing the problem and building the pipeline (`01-problema.md`, `02-pipeline.md`), for **6 h 30 min**. The intervals above were recorded by the agents and are not a substitute for this figure: they exclude the author's reading, reviews and merges, and include approval waits. The brief caps the exercise at six hours including planning; whether the 30 min of analysis falls inside that cap is for the author to state in the proposal.
+
+P10 follow-up on 2026-09-25: recorded clock interval 13:37:55–13:40:36 America/Bogota: bilingual DECISIONS.md with the product-scope section, and the README installation guide.
