@@ -94,3 +94,7 @@ Las escrituras pasan dos capas: los triggers de P2 (líder asignado, etiqueta de
 - `review_queue`: respuestas sin revisión de los últimos 14 días, con la cobertura de su especialista para ordenar en SQL: `last_reviewed_at` ascendente con nulos primero y después `sent_at` ascendente.
 
 Nada se almacena: las cifras salen de `replies` y `reviews` en cada lectura. `anon` no tiene privilegios sobre las vistas.
+
+## P6 · Guardado atómico
+
+`20260925200000_submit_review.sql` define `public.submit_review(p_reply_id, p_score, p_comment, p_is_example, p_tag_ids)`. Es `SECURITY INVOKER` con `search_path = ''`: las políticas de P4 aplican a ambas inserciones y los triggers de P2 siguen validando líder asignado y ámbito de etiquetas. No existe parámetro de revisor; se usa `auth.uid()`. Al ser una sola llamada, cualquier fallo (etiqueta de otra marca, duplicado, marca ajena, puntaje o comentario inválidos) revierte revisión y etiquetas. Etiquetas repetidas se guardan una vez; el comentario se recorta. `EXECUTE` solo para `authenticated`.
