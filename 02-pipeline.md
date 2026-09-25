@@ -295,6 +295,8 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 **Hecho cuando:** Dani ve solo lo suyo y la prueba de authz sigue pasando.
 
+*Implementado:* además del promedio y n, revisiones con problema crítico y aviso cuando n < 5; la respuesta original se despliega junto al comentario.
+
 **Qué revisar en el PR:** filtros de permisos en la consulta que tapen una política mal escrita, estado vacío ("Todavía no tienes revisiones").
 
 ---
@@ -416,7 +418,12 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/review-queue` / GitHub PR #6 | `c00ca3f` | Cola por marca con cobertura por especialista; pendientes P3/P4 | P5 | Ver `ai-logs/P5.md` | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #6 | `26f13f6` | Integración de P5 mediante merge commit | P5 | Autor revisó el funcionamiento; señaló el recorte de contenido en la cola | Ver `docs/time-log.md` |
 
-**Entrega P6:** `feat/review-workspace` parte de `26f13f6`; `submit_review` atómica (`security invoker`, sin parámetro de revisor), `/review/[replyId]` con carta, procedimiento fijo, etiquetas por severidad, atajos y `useActionState`; corrección de la vista previa de la cola; tema daisyUI y fuentes (adelanta P9a). Registro en `ai-logs/P6.md`; descripción de PR en `docs/P6-pr.md`. P7 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
+**Entrega P6:** `feat/review-workspace` parte de `26f13f6`; `submit_review` atómica (`security invoker`, sin parámetro de revisor), `/review/[replyId]` con carta, procedimiento fijo, etiquetas por severidad, atajos y `useActionState`; corrección de la vista previa de la cola; tema daisyUI y fuentes (adelanta P9a). Registro en `ai-logs/P6.md`; descripción de PR en `docs/P6-pr.md`. Publicado como `9a49535`.
+
+| 2026-09-25 | `feat/review-workspace` / GitHub PR #7 | `9a49535` | Espacio de revisión con guardado atómico, atajos y base visual; corrección de la cola | P6 (+ P9a parcial) | Ver `ai-logs/P6.md` | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #7 | `1dea779` | Integración de P6 mediante merge commit | P6 | Autor verificó manualmente la plataforma | Ver `docs/time-log.md` |
+
+**Entrega P7:** `feat/specialist-view` parte de `1dea779`; vista `review_summary` (`security_invoker`, n y promedio sin inflar por etiquetas), `/me` con resumen por marca, filtro, feedback con severidad y respuesta original, estado vacío; portada y navegación por rol; `review_summary.test.sql` y dos casos nuevos en `authz-check`. Registro en `ai-logs/P7.md`; descripción de PR en `docs/P7-pr.md`. P8 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
 
 ### Plantilla de revisión para cada PR
 

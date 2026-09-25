@@ -98,3 +98,7 @@ Nada se almacena: las cifras salen de `replies` y `reviews` en cada lectura. `an
 ## P6 · Guardado atómico
 
 `20260925200000_submit_review.sql` define `public.submit_review(p_reply_id, p_score, p_comment, p_is_example, p_tag_ids)`. Es `SECURITY INVOKER` con `search_path = ''`: las políticas de P4 aplican a ambas inserciones y los triggers de P2 siguen validando líder asignado y ámbito de etiquetas. No existe parámetro de revisor; se usa `auth.uid()`. Al ser una sola llamada, cualquier fallo (etiqueta de otra marca, duplicado, marca ajena, puntaje o comentario inválidos) revierte revisión y etiquetas. Etiquetas repetidas se guardan una vez; el comentario se recorta. `EXECUTE` solo para `authenticated`.
+
+## P7 · Resumen de feedback
+
+`20260925210000_review_summary.sql` crea `review_summary` (`security_invoker`): por marca y especialista, número de revisiones, promedio (2 decimales), revisiones con al menos un problema crítico y fecha de la última. El conteo de críticos usa `EXISTS` para que una revisión con varias etiquetas no pese más en el promedio (hay una prueba para ello). La vista no filtra por rol ni por especialista: un especialista recibe su fila por RLS, un líder las de su equipo. `anon` no tiene acceso.

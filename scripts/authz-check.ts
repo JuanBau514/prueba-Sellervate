@@ -128,6 +128,10 @@ async function main() {
   check(daniQueue.rows.length === 0 && daniCoverage.rows.length === 0,
     "Specialists get no review queue or colleagues' coverage", `${daniQueue.rows.length}/${daniCoverage.rows.length} rows`);
 
+  const daniSummary = await rest(dani.token, 'review_summary?select=specialist_id,reviews');
+  check(daniSummary.rows.length > 0 && daniSummary.rows.every((row) => row.specialist_id === dani.id),
+    'Dani\'s feedback summary contains only his own reviews', `${daniSummary.rows.length} rows`);
+
   const nuriaQueue = await rest(nuria.token, 'review_queue?select=brand_id');
   check(nuriaQueue.rows.length > 0 && nuriaQueue.rows.every((row) => row.brand_id === brisa),
     "Nuria's queue contains only her brand", `${nuriaQueue.rows.length} rows`);
@@ -189,6 +193,13 @@ async function main() {
   check(peerStatus === 404, "GET /api/replies/<same-brand colleague's> → 404", `status ${peerStatus}`);
   const anonStatus = await appGet(ownReply, null);
   check(anonStatus === 401, 'GET /api/replies/<id> without a session → 401', `status ${anonStatus}`);
+
+  // Feedback page: Dani's /me must not contain a review of Lucía's reply in Caja Norte.
+  const luciaComment = String((await rest(marta.token, `reviews?select=comment,reply:replies!inner(specialist_id)&reply.specialist_id=eq.${lucia}&limit=1`)).rows[0]?.comment ?? '');
+  const mePage = await fetch(`${appUrl}/me`, { headers: { Cookie: `${accessCookie}=${dani.token}` }, redirect: 'manual' });
+  const meHtml = await mePage.text();
+  check(mePage.status === 200 && luciaComment !== '' && !meHtml.includes(luciaComment.slice(0, 40).replace(/&/g, '&amp;')),
+    "GET /me as Dani → 200 without a colleague's feedback", `status ${mePage.status}`);
 
   console.log(failures === 0 ? '\nauthz-check: all checks passed.' : `\nauthz-check: ${failures} check(s) failed.`);
   process.exit(failures === 0 ? 0 : 1);
