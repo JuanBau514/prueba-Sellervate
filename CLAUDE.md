@@ -2,6 +2,10 @@
 
 Read `01-problema.md`, `02-pipeline.md` and `docs/implementation-plan.md` before making changes.
 
+- `main` is the principal integration and submission branch. Start working branches from updated main and explicitly target main in every PR.
+- Keep README.md complete and equivalent in Spanish and English, including setup, demo data, role switching, status and actual time.
+- Read `docs/delivery-checklist.md` and record the current task's evidence against Scoring, Delivery and Before you send it. Documented plans are not completed requirements.
+
 - Work on only the current problem/prompt. Keep branches and follow-up commits intact.
 - Describe the plan before implementing; the user's instruction to execute the scoped task authorizes its implementation.
 - The human author writes the actual review on the PR before merge. Do not invent or impersonate that review.

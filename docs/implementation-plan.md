@@ -8,6 +8,8 @@ The core problem is that expert judgement disappears after a Slack message. A le
 
 ## Clarifications to the original pipeline
 
+See the [scoring and delivery matrix](delivery-checklist.md) for required evidence and outstanding submission items.
+
 - The brief allows Codex and other agents; Claude Code is not a requirement. This session uses Codex.
 - Next.js App Router, TypeScript, Supabase and Tailwind are required. daisyUI, Recharts, local Supabase and the precise schema are implementation choices.
 - One isolated prompt per problem does not require one PR per problem: the original map already groups P1/P2. Keep the original branch mapping for now. Its eleven PRs need to fit the review budget; the brief says four or five are sufficient.
@@ -19,11 +21,28 @@ The core problem is that expert judgement disappears after a Slack message. A le
 - Coverage is calculated per brand and specialist, including never-reviewed specialists. Reviewing a person for one brand must not conceal a gap for another.
 - A review and its tags must be saved in one transaction. SQL aggregates must preserve RLS and visible sample sizes.
 
+## Main as the integration and delivery branch
+
+`main` is the permanent integration and submission branch. Every P0–P10 delivery (including P9a/P9b) reaches it through a reviewed PR. Working branches start from updated `main`; every PR explicitly uses `main` as its base. Keep merge commits, follow-up commits and working branches. Do not squash, rebase or replace main with an unreviewed feature branch.
+
+The public GitHub API currently shows only `chore/scaffold`, selected as the default branch. Local `main` exists at `4fe1b3a`, the initial planning commit. Preserve that base so P0's application changes can be reviewed. Once authenticated access is available:
+
+```sh
+git push -u origin main
+gh repo edit JuanBau514/prueba-Sellervate --default-branch main
+git push -u origin chore/scaffold
+gh pr create --repo JuanBau514/prueba-Sellervate --base main --head chore/scaffold --title "P0: application scaffold and delivery workflow" --body-file docs/P0-pr.md
+```
+
+These are pending operations, not evidence they were performed. The human author then reads the PR and writes their review on GitHub. Resolve comments in this branch. After review and merge authorization, merge the PR using a merge commit and retain the branch. Return to `main`, pull with `--ff-only`, then create the next problem's branch. Publishing the initial planning base is the bootstrap; subsequent deliveries use this PR workflow.
+
+Keep README.md in Spanish and English with equivalent setup instructions, status, seed/role guidance, actual-time accounting and submission requirements. Maintain the scoring and delivery checklist against the PDF, without declaring unfinished requirements complete.
+
 ## Independent prompts and execution order
 
 Use this contract for each new task, replacing `P…` with the entry below:
 
-> Read CLAUDE.md, 01-problema.md, docs/implementation-plan.md and the P… section of 02-pipeline.md. Implement only P… on its designated branch from reviewed main. State the scoped plan, inspect the existing implementation, preserve user changes, and record this prompt. Run the acceptance checks, review the diff for security and scope, and report what passed and what was blocked. Commit and push the branch to JuanBau514/prueba-Sellervate and open a PR if authenticated access is available. Leave the actual human review and merge pending; do not fabricate either. Record real time, decisions and remaining work. Do not begin the next problem in this turn.
+> Read CLAUDE.md, 01-problema.md, docs/implementation-plan.md, docs/delivery-checklist.md and the P… section of 02-pipeline.md. Implement only P… on its designated branch from reviewed main. State the scoped plan, inspect the existing implementation, preserve user changes, and record this prompt. Run the acceptance checks, review the diff for security and scope, and report what passed and what was blocked. Keep the Spanish and English README sections equivalent. Commit and push the branch to JuanBau514/prueba-Sellervate and open a PR explicitly targeting main if authenticated access is available. Leave the actual human review and merge pending; do not fabricate either. Record real time, decisions, affected scoring evidence and remaining delivery requirements. Do not begin the next problem in this turn.
 
 | Order | Prompt scope | Branch | Acceptance focus |
 | --- | --- | --- | --- |
