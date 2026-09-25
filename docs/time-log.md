@@ -36,3 +36,5 @@ P10 on 2026-09-25: recorded clock interval from the end of P9b to 13:28:15 Ameri
 ## Declared total
 
 The author declared the effective time on 2026-09-25: **6 h** for the technical requirements (implementation, PR review and verification across P0–P10) plus **30 min** analysing the problem and building the pipeline (`01-problema.md`, `02-pipeline.md`), for **6 h 30 min**. The intervals above were recorded by the agents and are not a substitute for this figure: they exclude the author's reading, reviews and merges, and include approval waits. The brief caps the exercise at six hours including planning; whether the 30 min of analysis falls inside that cap is for the author to state in the proposal.
+
+P10 follow-up on 2026-09-25: recorded clock interval 13:37:55–13:40:36 America/Bogota: bilingual DECISIONS.md with the product-scope section, and the README installation guide.

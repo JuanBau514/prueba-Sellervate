@@ -12,8 +12,8 @@ El documento pesa tanto como una feature y el README debe llevar a un desconocid
 
 ## Cambios
 
-- `DECISIONS.md` (inglés, dos páginas): Product, Architecture, AI, Status. Dos apartados marcados como borrador para el autor.
-- README final, bilingüe y equivalente: requisitos, puesta en marcha, cuentas y cambio de rol, recorrido, `authz-check` y pruebas, qué probaría primero, horas reales, entrega.
+- `DECISIONS.md` en inglés y español: alcance (producto para el loop de Sellervate, no calificador genérico), Product, Architecture, AI, Status. La parte en inglés cabe en dos páginas. Dos apartados marcados como borrador para el autor.
+- README final, bilingüe y equivalente: guía de instalación (requisitos con versiones probadas, Docker, Node, `.env.local` automático, base de datos, comandos, puertos, solución de problemas), cuentas y cambio de rol, recorrido, `authz-check` y pruebas, qué probaría primero, horas reales, entrega.
 - Clon limpio medido: 65 s con cachés calientes, con sus condiciones explicadas.
 - Matriz de entrega, registro de tiempo con las horas declaradas, bitácora, `ai-logs/P10.md`.
 
