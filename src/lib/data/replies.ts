@@ -19,11 +19,6 @@ export type ReplyDetail = ReplySummary & {
 const summaryColumns =
   'id,sent_at,brand:brands(name),specialist:people(full_name),review:reviews(score)';
 
-/** Replies visible to the viewer under RLS: their own, or their brands' as a lead. */
-export function listReplies(limit = 50) {
-  return select<ReplySummary>(`replies?select=${summaryColumns}&order=sent_at.desc&limit=${limit}`);
-}
-
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Null both when the reply does not exist and when RLS hides it. */

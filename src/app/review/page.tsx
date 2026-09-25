@@ -91,7 +91,7 @@ export default async function ReviewQueuePage({ searchParams }: PageProps<"/revi
       <Message title="Review queue">
         <p>
           The queue belongs to team leads. Your own replies and feedback are on{" "}
-          <Link href="/" className="link link-primary">your page</Link>.
+          <Link href="/me" className="link link-primary">your feedback page</Link>.
         </p>
       </Message>
     );

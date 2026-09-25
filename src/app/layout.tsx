@@ -26,9 +26,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               <Link href="/" className="text-base font-semibold tracking-tight">
                 Sellervate <span className="font-normal text-muted">Quality</span>
               </Link>
-              {viewer?.role === "lead" && (
-                <Link href="/review" className="text-sm text-muted hover:text-base-content">
-                  Review queue
+              {viewer && (
+                <Link
+                  href={viewer.role === "lead" ? "/review" : "/me"}
+                  className="text-sm text-muted hover:text-base-content"
+                >
+                  {viewer.role === "lead" ? "Review queue" : "Your feedback"}
                 </Link>
               )}
             </nav>
