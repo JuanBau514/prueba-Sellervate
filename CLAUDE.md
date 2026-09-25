@@ -3,6 +3,7 @@
 Read `01-problema.md`, `02-pipeline.md` and `docs/implementation-plan.md` before making changes.
 
 - `main` is the principal integration and submission branch. Start working branches from updated main and explicitly target main in every PR.
+- Use only Git over SSH in the terminal. Do not use `gh`, switch the working remote to HTTPS or alter SSH keys. PR creation, human review and merging happen on the GitHub website; provide comparison links and prepared descriptions.
 - Keep README.md complete and equivalent in Spanish and English, including setup, demo data, role switching, status and actual time.
 - Read `docs/delivery-checklist.md` and record the current task's evidence against Scoring, Delivery and Before you send it. Documented plans are not completed requirements.
 

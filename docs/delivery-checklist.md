@@ -6,14 +6,14 @@ Fuente: PDF local «Sellervate-Technical-Exercise (1).pdf», especialmente pági
 
 | Dimensión del PDF | Peso | Evidencia que debemos producir | Problemas | Estado actual |
 | --- | ---: | --- | --- | --- |
-| How you worked · Forma de trabajo | 24 | PR pequeños del agente, revisión escrita real del autor antes del merge, correcciones en la misma rama, historial y ramas intactos | Todos | P0 publicado; sin PR ni revisión verificables todavía |
+| How you worked · Forma de trabajo | 24 | PR pequeños del agente, revisión escrita real del autor antes del merge, correcciones en la misma rama, historial y ramas intactos | Todos | P0 integrado mediante PR #1; P1 en rama independiente. Verificación final de comentarios de revisión pendiente |
 | Problem interpretation and prioritisation · Interpretación y prioridades | 18 | Problema central, elección del loop de revisión, supuestos y recortes defendibles en DECISIONS.md | P0, P10 | Interpretación y pipeline escritos; decisiones finales pendientes |
-| Architecture and code · Arquitectura y código | 13 | Separación de responsabilidades, código legible, lecturas en servidor y flujo completo | P0, P4–P8 | Solo base técnica implementada |
-| Data model · Modelo de datos | 12 | Entidades y relaciones coherentes, integridad, migraciones e importación futura posible | P1–P3 | Pendiente |
-| Security and tenant isolation · Seguridad y aislamiento | 10 | Autorización en servidor; pruebas directas entre marcas y entre especialistas, sin depender de ocultar botones | P4, P6–P8 | Pendiente |
+| Architecture and code · Arquitectura y código | 13 | Separación de responsabilidades, código legible, lecturas en servidor y flujo completo | P0, P4–P8 | Base técnica y migración P1; flujo de aplicación pendiente |
+| Data model · Modelo de datos | 12 | Entidades y relaciones coherentes, integridad, migraciones e importación futura posible | P1–P3 | P1 corregido a 3FN para las dependencias declaradas: rol solo en `people`; ensayo de actualización conserva datos y 47 pruebas pasan. Commit de corrección a cargo del autor; P2/P3 pendientes |
+| Security and tenant isolation · Seguridad y aislamiento | 10 | Autorización en servidor; pruebas directas entre marcas y entre especialistas, sin depender de ocultar botones | P4, P6–P8 | P1: RLS activo y acceso cerrado por defecto, comprobado. Políticas y pruebas de autorización funcional de P4 pendientes |
 | Interface and visual craft · Interfaz y diseño | 10 | Escala tipográfica, sistema de color explicable, estados de carga/vacío/error y recorrido comprensible | P9a, P5–P9b | Pendiente; P0 es solo una página mínima |
 | Decisions document · Documento de decisiones | 8 | DECISIONS.md breve y defendible, con todos los apartados del brief | P10, actualizado con decisiones reales | Pendiente |
-| Ground covered in six hours · Alcance en seis horas | 5 | Producto coherente de extremo a extremo dentro del límite, con estado y horas reales | Todos | Solo P0; tiempo efectivo acumulado sin confirmar |
+| Ground covered in six hours · Alcance en seis horas | 5 | Producto coherente de extremo a extremo dentro del límite, con estado y horas reales | Todos | P0 y P1; tiempo efectivo acumulado sin confirmar |
 | **Total** | **100** | | | |
 
 Los dos primeros criterios suman 42 puntos: reservar tiempo para decidir, revisar y documentar. El brief considera suficientes cuatro o cinco PR reales; los once del pipeline son nuestra organización inicial, no una exigencia del evaluador. No se evalúan cobertura exhaustiva, despliegue, perfección de casos extremos ni ausencia total de asperezas. No gastar el presupuesto en esas áreas a costa del flujo principal.
@@ -21,13 +21,13 @@ Los dos primeros criterios suman 42 puntos: reservar tiempo para decidir, revisa
 ## Restricciones técnicas y diseño
 
 - [x] Base Next.js App Router + TypeScript y Tailwind; daisyUI elegido como complemento opcional.
-- [x] Supabase local inicia; falta el modelo y su uso por el producto.
+- [x] Supabase local inicia y aplica la migración de P1; falta P2 y su uso por el producto.
 - [ ] Monorepo público en GitHub con historial, ramas y PR conservados. El repositorio público existe; el proceso de PR aún no está completado.
 - [ ] Datos inventados: mínimo dos marcas, tres especialistas, dos líderes y suficientes revisiones para que el promedio signifique algo. El plan usa tres marcas.
 - [ ] Forma de entrar como cada rol. Login simulado permitido; autorización en servidor obligatoria.
 - [ ] Respuestas creíbles, voces distintas por marca y al menos un caso claramente malo.
 - [ ] Diseño intencional: consultar sellervate.com como referencia, sin copiar; tipografía, color y estados explicables. La referencia visual se revisará en P9a.
-- [x] Prompt y registro de P0 versionados; continuar conservando los siguientes.
+- [x] Prompts y registros de P0 y P1 versionados; continuar conservando los siguientes.
 - [ ] Recorrido de producto funcional de extremo a extremo y alcance recortado explícitamente cuando corresponda.
 
 ## DECISIONS.md · Máximo dos páginas
@@ -61,6 +61,6 @@ La evaluación lee PR y DECISIONS.md antes de ejecutar el producto. Si hay entre
 
 ## Estado remoto y siguiente acción
 
-Comprobado por la API pública de GitHub el 24 de septiembre de 2026: repositorio público, única rama publicada `chore/scaffold`, predeterminada `chore/scaffold` y ningún PR. Localmente existe `main` en `4fe1b3a`; contiene solo la planificación inicial.
+Actualizado al iniciar P1: `git fetch origin` confirma `main` como HEAD remoto y el merge de P0 mediante GitHub PR #1 (`1beec2a`). `feat/data-model` contiene P1. La instrucción posterior del usuario separa P2 en `feat/quality-criteria`; no se ha creado ni implementado en esta corrección.
 
-Publicar ese `main` existente permite abrir el PR de P0 con un diff real. No renombrar `chore/scaffold` a `main` ni mover `main` directamente al commit de P0: se perdería el punto de comparación para su revisión. El procedimiento está en [el acuerdo de ejecución](implementation-plan.md#main-as-the-integration-and-delivery-branch). Actualizar este estado después de cada operación remota verificada.
+P1 y su corrección de normalización están verificados localmente. El usuario hará commit y push de la corrección; después de revisar e integrar P1, P2 comenzará en su propia rama desde `main`. Usar exclusivamente Git por SSH en la terminal y la web de GitHub para revisar e integrar el PR, con [descripción preparada](PR1.md). El procedimiento está en [el acuerdo de ejecución](implementation-plan.md#main-as-the-integration-and-delivery-branch). La comprobación final del contenido de las revisiones humanas sigue pendiente; un merge por sí solo no prueba esa revisión.
