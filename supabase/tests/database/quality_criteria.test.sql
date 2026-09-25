@@ -76,7 +76,7 @@ $$, '23505', null, 'V1 permits only one review per reply');
 select throws_ok($$ update public.reviews set score = 0; $$, '23514', null, 'Score zero is rejected');
 select throws_ok($$ update public.reviews set score = 5; $$, '23514', null, 'Score five is rejected');
 select throws_ok($$ update public.reviews set comment = ' '; $$, '23514', null, 'Feedback must include a nonblank comment');
-select is((select bool_or(is_example) from public.reviews), false, 'Reviews are not examples by default');
+select is((select bool_or(is_example) from public.reviews where id::text like '50000000-%'), false, 'Reviews are not examples by default');
 select lives_ok($$ update public.reviews set score = 3, comment = 'Edited feedback', is_example = true; $$,
   'Current feedback and example marker can be edited');
 select ok((select bool_and(updated_at > created_at) from public.reviews), 'Review edits advance updated_at automatically');
@@ -129,7 +129,7 @@ select throws_ok($$ update public.brand_changes set author_id = '10000000-0000-0
   '23514', null, 'Brand change authorship is fixed');
 select lives_ok($$ delete from public.brand_memberships where person_id = '10000000-0000-0000-0000-000000000002'; $$,
   'Later lead reassignment does not erase historical reviews or interventions');
-select is((select count(*) from public.reviews), 2::bigint, 'Historical reviews survive membership removal');
+select is((select count(*) from public.reviews where id::text like '50000000-%'), 2::bigint, 'Historical reviews survive membership removal');
 
 select hasnt_column('public', 'reviews', 'brand_id', 'Review brand is derived, not duplicated');
 select hasnt_column('public', 'review_tags', 'severity', 'Severity lives only in the criterion catalog');
@@ -179,9 +179,9 @@ select results_eq($$ delete from public.review_tags returning review_id $$,
 reset role;
 select lives_ok($$ delete from public.reviews where id = '50000000-0000-0000-0000-000000000001'; $$,
   'Explicit admin review deletion removes dependent join rows only');
-select is((select count(*) from public.review_tags), 1::bigint, 'Cascade preserves other review associations');
-select is((select count(*) from public.replies), 3::bigint, 'Deleting a review does not delete replies');
-select is((select count(*) from public.issue_tags), 3::bigint, 'Deleting a review does not delete criteria');
+select is((select count(*) from public.review_tags where review_id::text like '50000000-%'), 1::bigint, 'Cascade preserves other review associations');
+select is((select count(*) from public.replies where id::text like '30000000-%'), 3::bigint, 'Deleting a review does not delete replies');
+select is((select count(*) from public.issue_tags where id::text like '40000000-%'), 3::bigint, 'Deleting a review does not delete criteria');
 
 select * from finish();
 rollback;

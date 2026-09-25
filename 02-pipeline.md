@@ -179,7 +179,7 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 **Problema:** es un producto para leer lo que alguien escribió; con lorem ipsum nadie ve que funciona.
 
-**Solución con el stack:** `scripts/seed.ts` ejecutado con `tsx`.
+**Solución con el stack:** `scripts/seed.ts` ejecutado con `tsx`. *Implementado:* por decisión del usuario, sin dependencias nuevas: `node scripts/seed.ts` (TypeScript nativo de Node ≥ 22.18) y `fetch` directo a Auth admin y REST en lugar de `supabase-js`.
 - Crea usuarios con `supabase.auth.admin.createUser` (service role, **solo en este script**) y una contraseña de demo común.
 - Inserta el dominio con los ids devueltos.
 
@@ -392,7 +392,10 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/data-model` / GitHub PR #2 | `ae05513` | Corrección de normalización realizada por el autor; rol solo en people, migración incremental y 47 pruebas | P1 | Responde a la revisión de normalización; ensayo conserva datos | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #2 | `2b7aba8` | Integración de P1 y su corrección mediante merge commit | P1 | Confirmado por Git; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
 
-**Entrega P2:** `feat/quality-criteria` parte de `2b7aba8`; migración de criterios y revisiones, 110 aserciones aprobadas y documentación bilingüe. Registro de implementación en `ai-logs/P2.md`; descripción de PR en `docs/P2-pr.md`. P3 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
+| 2026-09-25 | `feat/quality-criteria` / GitHub PR #3 | `bcc91ef` | Criterios por marca con severidad, revisiones, etiquetas e intervenciones; 110 aserciones | P2 | Ver `ai-logs/P2.md` | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #3 | `9295e76` | Integración de P2 mediante merge commit | P2 | Confirmado por Git; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
+
+**Entrega P3:** `feat/seed` parte de `9295e76`; `scripts/seed.ts` sin dependencias nuevas (Node nativo + `fetch`), 5 cuentas, 3 marcas, 42 respuestas y 27 revisiones con fechas relativas; pruebas de P1/P2 acotadas a sus fixtures para pasar con datos sembrados. Registro en `ai-logs/P3.md`; descripción de PR en `docs/P3-pr.md`. P4 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
 
 ### Plantilla de revisión para cada PR
 

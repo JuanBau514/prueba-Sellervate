@@ -97,7 +97,7 @@ select lives_ok($$
   select brand_id, specialist_id, customer_message, body, sent_at, source, external_id from public.replies
   on conflict (brand_id, source, external_id) do nothing;
 $$, 'The identity constraint supports idempotent import conflict handling');
-select is((select count(*) from public.replies), 3::bigint, 'Idempotent imports preserve the reply count');
+select is((select count(*) from public.replies where brand_id::text like '20000000-%'), 3::bigint, 'Idempotent imports preserve the reply count');
 
 select throws_ok($$ update public.replies set first_response_minutes = -1; $$,
   '23514', null, 'Negative response times are rejected');
@@ -203,6 +203,6 @@ select results_eq($$ delete from public.replies returning id $$,
   $$ select null::uuid where false $$, 'RLS hides rows from authenticated deletes');
 reset role;
 
-select is((select count(*) from public.replies), 3::bigint, 'Denied deletes preserve all replies');
+select is((select count(*) from public.replies where brand_id::text like '20000000-%'), 3::bigint, 'Denied deletes preserve all replies');
 select * from finish();
 rollback;
