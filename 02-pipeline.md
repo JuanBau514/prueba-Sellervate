@@ -143,7 +143,7 @@ Propuesta inicial (a validar en el PR):
 
 **Problema P2:** la calidad depende de la marca y los errores tienen pesos distintos.
 
-**Solución con el stack:** migraciones SQL en `supabase/migrations/`. Tras la revisión de normalización, el usuario solicitó ramas separadas: P1 y su corrección en `feat/data-model`; P2, posteriormente, en `feat/quality-criteria` desde `main` con P1 integrado. P1 crea las cuatro tablas base; P2 agregará criterios y revisiones. Detalles de normalización e integridad de P1 en [docs/data-model.md](docs/data-model.md).
+**Solución con el stack:** migraciones SQL en `supabase/migrations/`. Tras la revisión de normalización, el usuario solicitó ramas separadas: P1 y su corrección en `feat/data-model`; P2 en `feat/quality-criteria` desde `main` con P1 integrado. P1 crea las cuatro tablas base; P2 agrega criterios, revisiones, asociaciones e intervenciones. Detalles de normalización e integridad en [docs/data-model.md](docs/data-model.md).
 
 ```
 people            id (= auth.users.id), full_name, role ('lead'|'specialist')
@@ -169,7 +169,7 @@ brand_changes     id, brand_id, author_id, happened_on, note
 - Etiquetas globales y por marca en la misma tabla.
 - `is_example` deja abierto el coaching sin construirlo.
 
-**Hecho cuando:** `supabase db reset` aplica la migración sin errores.
+**Hecho cuando:** las migraciones se aplican sin errores y las pruebas de integridad pasan. En una base existente usar `supabase migration up --local`, que no borra datos; reservar `supabase db reset` para bases desechables. P2 se verificó con migración incremental, 110 aserciones y lint SQL sin errores; no se reinició la base local.
 
 **Qué revisar en el PR:** enums, `brand_id` duplicado en `reviews`, falta de índices en `replies(brand_id, sent_at)` y `replies(specialist_id)`, `on delete` que borre revisiones en cascada desde una respuesta.
 
@@ -389,8 +389,10 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-24 | `chore/scaffold` / GitHub PR #1 | `c089886` | README bilingüe y criterios de entrega, commit realizado por el autor | P0 | Corrección solicitada por el usuario | Ver `docs/time-log.md` |
 | 2026-09-24 | `main` / GitHub PR #1 | `1beec2a` | Integración de P0 con merge commit | P0 | Historial conservado; lectura del comentario de revisión pendiente | Ver `docs/time-log.md` |
 | 2026-09-24 | `feat/data-model` / PR1 del pipeline | `67ab919` | Migración inicial de cuatro tablas, RLS cerrado, 38 pruebas de integridad/acceso y documentación bilingüe | P1 | El plan inicial de compartir rama con P2 fue sustituido después por ramas separadas | Ver `docs/time-log.md` |
+| 2026-09-25 | `feat/data-model` / GitHub PR #2 | `ae05513` | Corrección de normalización realizada por el autor; rol solo en people, migración incremental y 47 pruebas | P1 | Responde a la revisión de normalización; ensayo conserva datos | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #2 | `2b7aba8` | Integración de P1 y su corrección mediante merge commit | P1 | Confirmado por Git; contenido de revisión humana pendiente de verificación final | Ver `docs/time-log.md` |
 
-**Corrección del 2026-09-25 pendiente de commit del autor:** nueva migración de normalización, rol solo en `people`, eliminación de columnas/índices redundantes, validación de autor y 47 pruebas aprobadas. El ensayo de actualización conservó las filas existentes. Ver `ai-logs/P1-normalization.md`. No se hizo commit/push ni se inició P2.
+**Entrega P2:** `feat/quality-criteria` parte de `2b7aba8`; migración de criterios y revisiones, 110 aserciones aprobadas y documentación bilingüe. Registro de implementación en `ai-logs/P2.md`; descripción de PR en `docs/P2-pr.md`. P3 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
 
 ### Plantilla de revisión para cada PR
 

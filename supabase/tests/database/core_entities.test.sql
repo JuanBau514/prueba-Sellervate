@@ -68,7 +68,7 @@ $$, 'Profile name edits and unchanged role values remain valid');
 select throws_ok($$
   update public.replies set specialist_id = '10000000-0000-0000-0000-000000000002',
     brand_id = '20000000-0000-0000-0000-000000000002';
-$$, '23503', null, 'A specialist from another brand cannot be assigned to the reply');
+$$, '23514', null, 'P2 also rejects moving an existing reply to another brand');
 
 select throws_ok($$
   insert into public.replies (brand_id, specialist_id, customer_message, body, sent_at, source, external_id)
@@ -80,6 +80,11 @@ select lives_ok($$
   values ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000001',
     'How many boxes are in a pack?', 'Each pack contains 50 boxes.', now() - interval '1 day', 'message-1');
 $$, 'Another brand may use the same external reply identifier; unknown timing stays NULL');
+
+select throws_ok($$
+  update public.replies set specialist_id = '10000000-0000-0000-0000-000000000002'
+  where brand_id = '20000000-0000-0000-0000-000000000002';
+$$, '23503', null, 'A specialist from another brand cannot be assigned to the reply');
 
 select lives_ok($$
   insert into public.replies (brand_id, specialist_id, customer_message, body, sent_at, source, external_id)

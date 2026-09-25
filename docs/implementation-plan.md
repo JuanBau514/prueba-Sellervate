@@ -25,17 +25,17 @@ See the [scoring and delivery matrix](delivery-checklist.md) for required eviden
 
 `main` is the permanent integration and submission branch. Every P0–P10 delivery (including P9a/P9b) reaches it through a reviewed PR. Working branches start from updated `main`; every PR explicitly uses `main` as its base. Keep merge commits, follow-up commits and working branches. Do not squash, rebase or replace main with an unreviewed feature branch.
 
-P0 is merged into `main` through GitHub PR #1 (`1beec2a`), and the remote HEAD points to `main`. The user requires Git over SSH exclusively in the terminal. Do not use `gh` or change the working remote to HTTPS. For each problem:
+P0 is merged into `main` through GitHub PR #1 (`1beec2a`), P1 including normalization through PR #2 (`2b7aba8`), and the remote HEAD points to `main`. P2 starts from that verified merge. The user requires Git over SSH exclusively in the terminal. Do not use `gh` or change the working remote to HTTPS. For P2:
 
 ```sh
 git switch main
 git pull --ff-only origin main
-git switch -c feat/data-model
+git switch -c feat/quality-criteria
 # Implement the scoped problem and commit the reviewed local diff.
-git push -u origin feat/data-model
+git push -u origin feat/quality-criteria
 ```
 
-The agent prepares a PR description and the [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/data-model); the author creates the PR on GitHub with base `main`, writes their review there and merges with a merge commit after corrections. This is an explicit workflow adaptation to the user's Git-only requirement; it does not replace human review with an agent's self-check. Keep the branch. The author will commit and push the P1 normalization correction. After P1 is integrated, return to `main`, pull with `--ff-only`, then create the separate P2 branch `feat/quality-criteria`. Do not start P2 during this correction.
+The agent prepares a [PR description](P2-pr.md) and the [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/quality-criteria); the author creates the PR on GitHub with base `main`, writes their review there and merges with a merge commit after corrections. This is an explicit workflow adaptation to the user's Git-only requirement; it does not replace human review with an agent's self-check. Keep the branch. The author committed P1's normalization correction as `ae05513`; it is included in the verified P1 merge. P2 is implemented on its separate branch; P3 must wait for the next independent prompt.
 
 Keep README.md in Spanish and English with equivalent setup instructions, status, seed/role guidance, actual-time accounting and submission requirements. Maintain the scoring and delivery checklist against the PDF, without declaring unfinished requirements complete.
 

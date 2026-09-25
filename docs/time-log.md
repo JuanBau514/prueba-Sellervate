@@ -14,3 +14,5 @@ The six-hour cap includes planning, setup, implementation and human review. Esti
 Do not claim a final total until the user supplies the prior work duration and confirms effective time.
 
 Normalization follow-up on 2026-09-25: recorded clock interval 10:05:05–10:13:21 America/Bogota (8 min 16 sec elapsed, including approval waits). Initial inspection and final handoff are additional. This does not include overnight gaps or claim a total of effective work. The user will perform the correction commit/push.
+
+P2 on 2026-09-25: recorded clock interval 10:18:29–10:33:07 America/Bogota (14 min 38 sec elapsed, including approval waits), covering merge verification, schema implementation, tests and documentation. Final verification, publication and handoff are additional; this is not the cumulative effective-time total. P1's normalization was committed by the user as `ae05513` and merged through PR #2 before this task.

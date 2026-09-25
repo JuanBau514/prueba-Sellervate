@@ -1,6 +1,6 @@
-# P1 · Marcas, personas, asignaciones y respuestas
+# Modelo de datos · P1 y P2
 
-P1 se implementa con `20260925042000_core_entities.sql` y su corrección incremental `20260925151000_normalize_person_roles.sql`. Se conserva la migración publicada y se actualizan bases existentes sin recrearlas. Las tablas de criterios y revisiones pertenecen a P2, en una rama posterior independiente.
+P1 se implementa con `20260925042000_core_entities.sql` y su corrección incremental `20260925151000_normalize_person_roles.sql`, integradas en `main` mediante PR #2. P2 añade `20260925152500_quality_criteria.sql` en `feat/quality-criteria`. Se conservan las migraciones publicadas y se actualizan bases existentes sin recrearlas.
 
 ```mermaid
 erDiagram
@@ -37,7 +37,26 @@ Con las dependencias del dominio declaradas, las cuatro tablas quedan en 3FN: lo
 
 **Seguridad inicial:** las cuatro tablas tienen RLS habilitado, ninguna política y privilegios revocados a `PUBLIC`, `anon` y `authenticated`. El acceso del cliente queda cerrado hasta P4. El rol de servicio conserva operaciones de datos para el seed; no puede usarse en requests. P1 no equivale a la autorización por rol terminada.
 
-**Índices:** cola por `(brand_id, sent_at DESC)`, respuestas por `specialist_id` y miembros por `brand_id`, además de claves y restricciones únicas. No hay enums ni vistas. La única función con privilegios elevados es la comprobación interna del autor descrita arriba.
+**Índices de P1:** cola por `(brand_id, sent_at DESC)`, respuestas por `specialist_id` y miembros por `brand_id`, además de claves y restricciones únicas. No hay enums ni vistas. P2 añade las comprobaciones internas descritas a continuación.
+
+## P2 · Criterios y revisión
+
+| Tabla | Dependencias y normalización | Reglas |
+| --- | --- | --- |
+| `issue_tags` | `id → brand_id, code, label, severity`; `(brand_id, code)` identifica también el criterio, considerando NULL como ámbito global | Severidad crítica/mayor/menor; `UNIQUE NULLS NOT DISTINCT` evita códigos globales duplicados |
+| `reviews` | `id` y `reply_id` son claves alternativas; todos los atributos dependen de ellas | Una revisión por respuesta, puntaje entero 1–4, comentario obligatorio; marca derivada de `replies`, no almacenada |
+| `review_tags` | Relación N:M con clave `(review_id, tag_id)`, sin atributos no clave | Sin duplicados ni copia de marca/severidad; etiqueta global o de la marca de la respuesta |
+| `brand_changes` | `id → brand_id, author_id, happened_on, note` | Intervención fechada y nota obligatoria; autor líder asignado |
+
+Con estas dependencias, P2 conserva 3FN. `code` no determina por sí solo la severidad: marcas diferentes pueden usar el mismo código con criterios distintos. Los promedios y conteos de críticos no se almacenan; se calcularán desde las revisiones y el catálogo. La normalización se razona a partir de dependencias; las pruebas comprueban restricciones, no constituyen por sí solas una demostración de 3FN.
+
+**Integridad frente a autorización:** `private.check_quality_lead` comprueba al insertar que el revisor/autor sea un líder asignado a la marca; `private.check_review_tag_scope` valida las asociaciones tanto en INSERT como en UPDATE. Usan `SECURITY DEFINER`, `search_path = ''`, nombres cualificados y bloqueos `FOR KEY SHARE` de las filas consultadas. No conceden permisos al usuario ni comparan su sesión: P4 debe exigir `auth.uid()` y asignación vigente mediante RLS. Ninguna función interna tiene EXECUTE para roles API, incluido `service_role`.
+
+**Identidad e historial en V1:** la marca de una respuesta, la respuesta/revisor/fecha original de una revisión y la marca/autor de una intervención quedan fijos. También quedan fijos el ámbito, código y severidad del criterio; para cambiar su significado se crea otro código, evitando reclasificar los errores históricos. Se permite corregir la redacción de las etiquetas. La inmutabilidad de estos campos y del rol de P1 evita que una actualización concurrente invalide las comprobaciones. La pertenencia del líder se verifica al crear el registro: una baja posterior de esa membresía conserva la autoría histórica. Los permisos futuros de edición dependen de la membresía vigente, no de esta validación histórica.
+
+**Revisión editable:** puntaje, comentario e indicador de ejemplo pueden cambiar y un trigger mantiene `updated_at`. V1 conserva una revisión actual, no un historial de versiones. Borrar una respuesta con revisión o una etiqueta usada está prohibido. Borrar explícitamente una revisión elimina solo sus filas en `review_tags`, no la respuesta ni el catálogo. No existe una función pública para guardar: el guardado atómico de revisión y etiquetas queda para P6.
+
+**Acceso e índices:** las cuatro tablas nuevas tienen RLS sin políticas y sin privilegios para `anon`/`authenticated`; `service_role` conserva CRUD para seed, sujeto a integridad. Índices sobre revisor, fecha de revisión, etiqueta de la relación, marca/fecha de intervención y autor complementan las PK/UNIQUE. No hay enums, vistas ni endpoints nuevos. P3 aportará datos creíbles; P4 abrirá solo los permisos necesarios.
 
 ## Verificación
 
@@ -50,5 +69,7 @@ npm run db:test
 `migration up --local` aplica las migraciones pendientes sin borrar filas de negocio. Para recrear desde cero una base desechable existe `npm run db:reset`, que sí borra sus datos. Las pruebas usan fixtures dentro de una transacción y hacen rollback; no son el seed de demo ni crean cuentas utilizables. Comprueban asignaciones, roles, importación, protección del historial y cierre de acceso.
 
 El ensayo de actualización se ejecuta **solo sobre el esquema P1 anterior a la corrección**, concatenando en una sesión psql con `ON_ERROR_STOP=1`: `scripts/sql/normalization_before.sql`, la migración nueva y `scripts/sql/normalization_after.sql`. Compara todas las filas de las cuatro tablas y revierte tanto fixtures como DDL al terminar. Está fuera de `supabase/tests/` porque no es una prueba pgTAP para el esquema final.
+
+Verificación P2: **110 aserciones aprobadas** (48 de P1 y 62 de P2), migración incremental aplicada y lint SQL de `public,private` sin errores. P1 añade una comprobación separada de la FK de asignación porque P2 ahora rechaza antes el movimiento de una respuesta entre marcas. No se ejecutó `db reset` sobre los datos locales. Las pruebas no sustituyen las pruebas de autorización funcional que faltan en P4.
 
 Referencias: [restricciones de PostgreSQL 17](https://www.postgresql.org/docs/17/ddl-constraints.html), [RLS en Supabase](https://supabase.com/docs/guides/database/postgres/row-level-security) y [pruebas locales](https://supabase.com/docs/guides/local-development/testing/overview).
