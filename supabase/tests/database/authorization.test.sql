@@ -131,13 +131,19 @@ select throws_ok($$ insert into public.review_tags values ('65000000-0000-0000-0
 select lives_ok($$ delete from public.review_tags where review_id = '65000000-0000-0000-0000-000000000001' and tag_id = '64000000-0000-0000-0000-000000000001' $$,
   'Lead removes a tag from own review');
 select throws_ok($$
-  insert into public.brand_changes (brand_id, author_id, happened_on, note)
-  values ('62000000-0000-0000-0000-000000000003', '61000000-0000-0000-0000-000000000004', current_date, 'Not mine');
+  insert into public.brand_changes (brand_id, happened_on, note)
+  values ('62000000-0000-0000-0000-000000000003', current_date, 'Not mine');
 $$, null, null, 'Lead cannot log interventions for another brand');
 select lives_ok($$
-  insert into public.brand_changes (brand_id, author_id, happened_on, note)
-  values ('62000000-0000-0000-0000-000000000001', '61000000-0000-0000-0000-000000000004', current_date, 'Mine');
+  insert into public.brand_changes (brand_id, happened_on, note)
+  values ('62000000-0000-0000-0000-000000000001', current_date, 'Mine');
 $$, 'Lead logs an intervention for own brand');
+select is((select author_id::text from public.brand_changes where note = 'Mine'), '61000000-0000-0000-0000-000000000004',
+  'Intervention author comes from the session');
+select throws_ok($$
+  insert into public.brand_changes (brand_id, author_id, happened_on, note)
+  values ('62000000-0000-0000-0000-000000000001', '61000000-0000-0000-0000-000000000005', current_date, 'Signed as lead_b');
+$$, '42501', null, 'The author cannot be supplied by the client');
 reset role;
 
 -- lead_b: shares brand B with lead_ab but did not write lead_ab's review.

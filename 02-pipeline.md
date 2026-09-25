@@ -315,6 +315,8 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 **Hecho cuando:** Marta abre la marca de scooters y puede contar la historia en 30 segundos.
 
+*Implementado:* semanas por fecha de envío (no de revisión), para que una intervención se lea contra el trabajo que buscaba cambiar; patrones en ventana de 6 semanas contando semanas distintas; gráfico SVG en servidor sin librería (Recharts no se añadió); índice `/brands`.
+
 **Qué revisar en el PR:** vistas sin `security_invoker` (se saltan el RLS), promedios sin tamaño de muestra, mezcla de marcas en un agregado.
 
 ---
@@ -423,7 +425,12 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-25 | `feat/review-workspace` / GitHub PR #7 | `9a49535` | Espacio de revisión con guardado atómico, atajos y base visual; corrección de la cola | P6 (+ P9a parcial) | Ver `ai-logs/P6.md` | Ver `docs/time-log.md` |
 | 2026-09-25 | `main` / GitHub PR #7 | `1dea779` | Integración de P6 mediante merge commit | P6 | Autor verificó manualmente la plataforma | Ver `docs/time-log.md` |
 
-**Entrega P7:** `feat/specialist-view` parte de `1dea779`; vista `review_summary` (`security_invoker`, n y promedio sin inflar por etiquetas), `/me` con resumen por marca, filtro, feedback con severidad y respuesta original, estado vacío; portada y navegación por rol; `review_summary.test.sql` y dos casos nuevos en `authz-check`. Registro en `ai-logs/P7.md`; descripción de PR en `docs/P7-pr.md`. P8 no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
+**Entrega P7:** `feat/specialist-view` parte de `1dea779`; vista `review_summary` (`security_invoker`, n y promedio sin inflar por etiquetas), `/me` con resumen por marca, filtro, feedback con severidad y respuesta original, estado vacío; portada y navegación por rol; `review_summary.test.sql` y dos casos nuevos en `authz-check`. Registro en `ai-logs/P7.md`; descripción de PR en `docs/P7-pr.md`. Publicado como `cd2851d`.
+
+| 2026-09-25 | `feat/specialist-view` / GitHub PR #8 | `cd2851d` | `/me` con resumen por marca (promedio y n), filtro y feedback | P7 | Ver `ai-logs/P7.md` | Ver `docs/time-log.md` |
+| 2026-09-25 | `main` / GitHub PR #8 | `64134e3` | Integración de P7 mediante merge commit | P7 | Confirmado por Git | Ver `docs/time-log.md` |
+
+**Entrega P8:** `feat/brand-overview` parte de `64134e3`; vistas `brand_weekly_scores`, `brand_critical_reviews` y `brand_issue_patterns` (`security_invoker`, solo líderes, por `brand_id`), autor de `brand_changes` desde la sesión, `/brands` y `/brands/[slug]` con tendencia SVG con n y marcadores, críticos, patrones, cobertura y registro de cambios; `brand_overview.test.sql` y cuatro casos nuevos en `authz-check`. Registro en `ai-logs/P8.md`; descripción de PR en `docs/P8-pr.md`. P9b no iniciado. El hash de publicación se registra en la siguiente actualización de esta bitácora.
 
 ### Plantilla de revisión para cada PR
 

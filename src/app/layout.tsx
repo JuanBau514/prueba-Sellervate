@@ -34,6 +34,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                   {viewer.role === "lead" ? "Review queue" : "Your feedback"}
                 </Link>
               )}
+              {viewer?.role === "lead" && (
+                <Link href="/brands" className="text-sm text-muted hover:text-base-content">
+                  Brands
+                </Link>
+              )}
             </nav>
             <UserSwitcher viewer={viewer} />
           </div>

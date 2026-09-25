@@ -102,3 +102,13 @@ Nada se almacena: las cifras salen de `replies` y `reviews` en cada lectura. `an
 ## P7 · Resumen de feedback
 
 `20260925210000_review_summary.sql` crea `review_summary` (`security_invoker`): por marca y especialista, número de revisiones, promedio (2 decimales), revisiones con al menos un problema crítico y fecha de la última. El conteo de críticos usa `EXISTS` para que una revisión con varias etiquetas no pese más en el promedio (hay una prueba para ello). La vista no filtra por rol ni por especialista: un especialista recibe su fila por RLS, un líder las de su equipo. `anon` no tiene acceso.
+
+## P8 · Evidencia por marca
+
+`20260925220000_brand_overview.sql` añade tres vistas `security_invoker`, todas agrupadas por `brand_id` y filtradas por `private.is_brand_lead`:
+
+- `brand_weekly_scores`: por semana ISO de **envío** (7 semanas): n, promedio y revisiones con problema crítico (con `EXISTS`, sin inflar el promedio).
+- `brand_critical_reviews`: una fila por revisión y etiqueta crítica, con la respuesta afectada.
+- `brand_issue_patterns`: problema × especialista en 6 semanas, con ocurrencias y **semanas distintas**; dos o más semanas es un patrón.
+
+`brand_changes.author_id` pasa a `default auth.uid()` y se retira `INSERT (author_id)` a `authenticated`: el autor sale de la sesión igual que el revisor, y RLS sigue exigiendo líder asignado.

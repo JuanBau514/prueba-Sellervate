@@ -8,11 +8,11 @@ Herramienta interna para evaluar respuestas de soporte ya enviadas según los pr
 
 ### Estado y rama principal
 
-**En construcción; todavía no es la entrega final.** P0–P6 están integrados en `main`: seed local creíble, cambio de usuario con sesión real, autorización en Postgres (RLS) comprobada con llamadas directas a la API, cola de revisión con cobertura por especialista y espacio de revisión con guardado atómico y base visual. P7 añade en `feat/specialist-view` la página donde cada especialista lee su feedback. La evidencia por marca (P8) sigue pendiente.
+**En construcción; todavía no es la entrega final.** P0–P7 están integrados en `main`: seed local creíble, cambio de usuario con sesión real, autorización en Postgres (RLS) comprobada con llamadas directas a la API, cola de revisión con cobertura, espacio de revisión con guardado atómico y feedback del especialista. P8 añade en `feat/brand-overview` la evidencia por marca para los líderes. Quedan el pulido de estados (P9b) y la documentación final (P10).
 
 **`main` es la rama principal de integración y entrega.** Cada problema se trabaja con un prompt independiente y una rama basada en `main`; su PR apunta a `main`. Después de tu revisión escrita y las correcciones, se incorpora mediante **merge commit**, conservando ramas y commits, sin squash ni rebase. Por tu instrucción más reciente, P1 y P2 tendrán ramas y PR separados: P1 en `feat/data-model` y P2 en `feat/quality-criteria`, después de integrar P1.
 
-`main` es la rama predeterminada y contiene P0 mediante PR #1 (`1beec2a`), P1 normalizado mediante PR #2 (`2b7aba8`), P2 mediante PR #3 (`9295e76`), P3 mediante PR #4 (`f2766c1`), P4 mediante PR #5 (`5e93c3b`), P5 mediante PR #6 (`26f13f6`) y P6 mediante PR #7 (`1dea779`). P7 está implementado en `feat/specialist-view`, pendiente de revisión e integración. Usamos exclusivamente **Git por SSH** en la terminal y la web de GitHub para crear/revisar/integrar PR. Consulta el [procedimiento de integración](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
+`main` es la rama predeterminada y contiene P0 mediante PR #1 (`1beec2a`), P1 normalizado mediante PR #2 (`2b7aba8`), P2 mediante PR #3 (`9295e76`), P3 mediante PR #4 (`f2766c1`), P4 mediante PR #5 (`5e93c3b`), P5 mediante PR #6 (`26f13f6`), P6 mediante PR #7 (`1dea779`) y P7 mediante PR #8 (`64134e3`). P8 está implementado en `feat/brand-overview`, pendiente de revisión e integración. Usamos exclusivamente **Git por SSH** en la terminal y la web de GitHub para crear/revisar/integrar PR. Consulta el [procedimiento de integración](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
 
 ### Instalación y ejecución local
 
@@ -29,7 +29,7 @@ cp .env.example .env.local
 npm run db:status
 ```
 
-Para revisar P7 antes de su merge, cambia a `feat/specialist-view` después de clonar. En este checkout existente, empieza en `npm ci`. Si ya tienes `.env.local`, conserva sus valores y agrega solo las variables que falten. Un evaluador sin llave SSH puede clonar el repositorio público con `https://github.com/JuanBau514/prueba-Sellervate.git`; esto no cambia nuestro remoto de trabajo SSH.
+Para revisar P8 antes de su merge, cambia a `feat/brand-overview` después de clonar. En este checkout existente, empieza en `npm ci`. Si ya tienes `.env.local`, conserva sus valores y agrega solo las variables que falten. Un evaluador sin llave SSH puede clonar el repositorio público con `https://github.com/JuanBau514/prueba-Sellervate.git`; esto no cambia nuestro remoto de trabajo SSH.
 
 Copia a `.env.local` la URL local, la clave `anon` (`ANON_KEY`) y la clave `service_role` (`SERVICE_ROLE_KEY`) que muestra `npm run db:status`. `DEMO_PASSWORD` ya trae un valor local de ejemplo. La clave `service_role` permanece solo en el servidor; su único consumidor es `scripts/seed.ts`. La página inicial de P0 no necesita credenciales. El primer arranque de Supabase descarga imágenes Docker y depende de la conexión.
 
@@ -72,6 +72,8 @@ El guardado llama a la función `submit_review` (`security invoker`): inserta re
 
 **Feedback del especialista (P7).** `/me` muestra, marca por marca, el promedio **con su n** (por ejemplo Dani: Caja Norte 2,6 · n = 5; Voltia 2,4 · n = 5, 1 con problema crítico) y, debajo, cada revisión: marca, puntaje, problemas por severidad, comentario, quién revisó y cuándo, y la respuesta original desplegable. Con menos de 5 revisiones avisa de que conviene leer los comentarios antes que el promedio. Se filtra por marca con `?brand=`. La consulta no filtra por especialista: RLS devuelve solo lo propio, así que una política mal escrita no quedaría tapada. El resumen sale de la vista `review_summary` (`security_invoker`), que también servirá a P8. Estado vacío: «You have no reviews yet».
 
+**Evidencia por marca (P8).** «Brands» (`/brands`, solo líderes) lleva a `/brands/<slug>`, visible solo para los líderes de esa marca; otro líder o un especialista reciben 404. En 30 segundos: promedio de las últimas 4 semanas con n, revisiones con problema crítico y quién lleva más sin revisión; la **tendencia semanal** (semana de envío) con n bajo cada semana, las intervenciones como marcadores numerados y la tabla con las cifras; los **críticos** de 4 semanas con enlace a la respuesta; los **patrones** problema × especialista de 6 semanas, resaltando los que se repiten en semanas distintas (Voltia: Dani, «No revisó el historial del pedido», 3 semanas); la **cobertura**; y **«What we changed»**, un formulario corto para registrar intervenciones. Todos los agregados salen de vistas `security_invoker` limitadas a marcas lideradas y filtradas por un solo `brand_id`. El autor de una intervención lo pone la base (`default auth.uid()`); el cliente no puede enviarlo. El gráfico es SVG en servidor, sin librerías.
+
 Quién ve qué, aplicado en la base de datos:
 
 | Tabla | Lectura | Escritura |
@@ -90,7 +92,7 @@ Comprobación ejecutable, con la app en marcha (usa solo la clave anon y sesione
 npm run authz-check
 ```
 
-Verifica 24 casos: anónimo sin acceso a respuestas ni a la cola; Dani solo lee lo suyo, nada de otra marca ni de Lucía en su marca compartida; los especialistas no crean revisiones, no editan respuestas ni leen la cola o la cobertura; Nuria no ve la marca de Marta y su cola solo contiene Brisa Café; un líder no revisa otra marca ni firma como otra persona; `submit_review` rechaza al especialista, la marca ajena y la etiqueta de otra marca sin dejar revisión parcial; el resumen de Dani solo contiene lo suyo y su `/me` no muestra feedback de Lucía; y la ruta de la app responde 200/404/404/401.
+Verifica 28 casos: anónimo sin acceso a respuestas ni a la cola; Dani solo lee lo suyo, nada de otra marca ni de Lucía en su marca compartida; los especialistas no crean revisiones, no editan respuestas ni leen la cola o la cobertura; Nuria no ve la marca de Marta y su cola solo contiene Brisa Café; un líder no revisa otra marca ni firma como otra persona; `submit_review` rechaza al especialista, la marca ajena y la etiqueta de otra marca sin dejar revisión parcial; el resumen de Dani solo contiene lo suyo y su `/me` no muestra feedback de Lucía; los especialistas no leen evidencia de marca, Nuria no la de Voltia y nadie firma una intervención como otra persona; `/brands/voltia` responde 200 a Marta y 404 a Nuria y a Dani; y la ruta de la app responde 200/404/404/401.
 
 El objetivo obligatorio es pasar de un clon limpio al producto con datos y roles en menos de diez minutos; todavía no está verificado.
 
@@ -100,14 +102,14 @@ El objetivo obligatorio es pasar de un clon limpio al producto con datos y roles
 npm run check
 ```
 
-Ejecuta ESLint, TypeScript y una compilación de producción. Estas comprobaciones pasaron en P0; también se verificaron el arranque de la app y la salud de Supabase. En P7 pasaron lint, typecheck y el build de producción, y `/me` se revisó en Chrome (escritorio, filtro y 390 px). Para aplicar las migraciones sin recrear la base local, ejecuta lo siguiente. **`npm run db:reset` es una alternativa que borra los datos locales**; resérvala para reconstruir una base desechable:
+Ejecuta ESLint, TypeScript y una compilación de producción. Estas comprobaciones pasaron en P0; también se verificaron el arranque de la app y la salud de Supabase. En P8 pasaron lint, typecheck y el build de producción, y `/brands/voltia` se revisó en Chrome, incluido el registro de un cambio. Para aplicar las migraciones sin recrear la base local, ejecuta lo siguiente. **`npm run db:reset` es una alternativa que borra los datos locales**; resérvala para reconstruir una base desechable:
 
 ```sh
 npx --no-install supabase migration up --local
 npm run db:test
 ```
 
-Las pruebas comprueban asignaciones, identidad de importación, historial, criterios y revisiones, rechazo de etiquetas ajenas y, desde P4, cada política: acceso permitido y prohibido entre marcas, entre especialistas de la misma marca, entre colíderes, tras retirar una asignación y para anónimos; desde P5, la cola y la cobertura por marca y especialista; desde P6, el guardado atómico; desde P7, el resumen de feedback. Pasan **159 aserciones** en seis archivos, con base vacía y sembrada, y el lint SQL de `public,private` no encuentra errores. La cobertura exhaustiva y el despliegue no son requisitos del brief; la evaluación ejecuta el proyecto localmente. Ver [modelo y decisiones](docs/data-model.md).
+Las pruebas comprueban asignaciones, identidad de importación, historial, criterios y revisiones, rechazo de etiquetas ajenas y, desde P4, cada política: acceso permitido y prohibido entre marcas, entre especialistas de la misma marca, entre colíderes, tras retirar una asignación y para anónimos; desde P5, la cola y la cobertura por marca y especialista; desde P6, el guardado atómico; desde P7, el resumen de feedback; desde P8, la evidencia por marca y el autor de las intervenciones. Pasan **169 aserciones** en siete archivos, con base vacía y sembrada, y el lint SQL de `public,private` no encuentra errores. La cobertura exhaustiva y el despliegue no son requisitos del brief; la evaluación ejecuta el proyecto localmente. Ver [modelo y decisiones](docs/data-model.md).
 
 Solo `people` almacena el rol; la marca de una revisión se deriva de su respuesta y la severidad vive en el catálogo. Con las dependencias declaradas, el modelo conserva 3FN. Límites de V1: rol, marca de respuesta, atribución de revisión y ámbito/código/severidad de criterio son fijos; los nombres, etiquetas y feedback admiten correcciones. Cambiar la severidad requiere un nuevo criterio. Se valida que el revisor sea líder asignado y el usuario de la sesión; revisión y etiquetas se guardan juntas (P6). Una revisión guardada no se edita desde la interfaz en V1. No hay auditoría de versiones del feedback.
 
@@ -133,11 +135,11 @@ An internal tool for evaluating already-sent customer support replies against ea
 
 ### Status and main branch
 
-**Work in progress; not the final submission.** P0–P6 are integrated into `main`: a credible local seed, user switching with a real session, authorization in Postgres (RLS) checked with direct API calls, the review queue with per-specialist coverage and the review workspace with atomic save and a visual foundation. P7 adds the page where each specialist reads their feedback on `feat/specialist-view`. Brand evidence (P8) is still pending.
+**Work in progress; not the final submission.** P0–P7 are integrated into `main`: a credible local seed, user switching with a real session, authorization in Postgres (RLS) checked with direct API calls, the review queue with coverage, the review workspace with atomic save and the specialist's feedback. P8 adds brand evidence for leads on `feat/brand-overview`. State polish (P9b) and the final documentation (P10) remain.
 
 **`main` is the integration and delivery branch.** Each problem uses an independent prompt and a working branch based on `main`; its PR targets `main`. After your written review and corrections, it is integrated with a **merge commit**, retaining branches and commits, without squash or rebase. Per your latest instruction, P1 and P2 use separate branches and PRs: P1 on `feat/data-model`, then P2 on `feat/quality-criteria` after P1 is merged.
 
-`main` is the default branch and contains P0 through PR #1 (`1beec2a`), normalized P1 through PR #2 (`2b7aba8`), P2 through PR #3 (`9295e76`), P3 through PR #4 (`f2766c1`), P4 through PR #5 (`5e93c3b`), P5 through PR #6 (`26f13f6`) and P6 through PR #7 (`1dea779`). P7 is implemented on `feat/specialist-view`, awaiting review and integration. We use only **Git over SSH** in the terminal and GitHub's website to create, review and merge PRs. See the [integration procedure](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
+`main` is the default branch and contains P0 through PR #1 (`1beec2a`), normalized P1 through PR #2 (`2b7aba8`), P2 through PR #3 (`9295e76`), P3 through PR #4 (`f2766c1`), P4 through PR #5 (`5e93c3b`), P5 through PR #6 (`26f13f6`), P6 through PR #7 (`1dea779`) and P7 through PR #8 (`64134e3`). P8 is implemented on `feat/brand-overview`, awaiting review and integration. We use only **Git over SSH** in the terminal and GitHub's website to create, review and merge PRs. See the [integration procedure](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
 
 ### Local installation and startup
 
@@ -154,7 +156,7 @@ cp .env.example .env.local
 npm run db:status
 ```
 
-To review P7 before its merge, switch to `feat/specialist-view` after cloning. In this existing checkout, start at `npm ci`. If `.env.local` already exists, preserve its values and add only missing variables. Evaluators without an SSH key may clone the public repository using `https://github.com/JuanBau514/prueba-Sellervate.git`; this does not change our SSH working remote.
+To review P8 before its merge, switch to `feat/brand-overview` after cloning. In this existing checkout, start at `npm ci`. If `.env.local` already exists, preserve its values and add only missing variables. Evaluators without an SSH key may clone the public repository using `https://github.com/JuanBau514/prueba-Sellervate.git`; this does not change our SSH working remote.
 
 Copy the local URL, the `anon` key (`ANON_KEY`) and the `service_role` key (`SERVICE_ROLE_KEY`) shown by `npm run db:status` into `.env.local`. `DEMO_PASSWORD` already has a local example value. The service role key stays server-only; its sole consumer is `scripts/seed.ts`. The P0 landing page does not need credentials. The first Supabase start downloads Docker images and depends on connection speed.
 
@@ -197,6 +199,8 @@ Saving calls the `submit_review` function (`security invoker`): it inserts the r
 
 **Specialist feedback (P7).** `/me` shows, brand by brand, the average **with its n** (e.g. Dani: Caja Norte 2.6 · n = 5; Voltia 2.4 · n = 5, 1 with a critical issue) and, below, every review: brand, score, issues by severity, comment, who reviewed and when, and the original reply on demand. Below 5 reviews it suggests reading the comments rather than the average. Filter by brand with `?brand=`. The query does not filter by specialist: RLS returns only their own, so a badly written policy would not be masked. The summary comes from the `review_summary` view (`security_invoker`), which P8 will reuse. Empty state: "You have no reviews yet".
 
+**Brand evidence (P8).** "Brands" (`/brands`, leads only) leads to `/brands/<slug>`, visible only to that brand's leads; another lead or a specialist gets a 404. In 30 seconds: the last-4-weeks average with n, reviews with a critical issue and who has gone longest without a review; the **weekly trend** (by week sent) with n under each week, interventions as numbered markers and a table of the numbers; **critical issues** from the last 4 weeks linking to the reply; **patterns** issue × specialist over 6 weeks, highlighting those repeated across different weeks (Voltia: Dani, "No revisó el historial del pedido", 3 weeks); **coverage**; and **"What we changed"**, a short form to record interventions. Every aggregate comes from `security_invoker` views limited to led brands and filtered to a single `brand_id`. The database sets an intervention's author (`default auth.uid()`); the client cannot send it. The chart is server-rendered SVG, no library.
+
 Who sees what, enforced in the database:
 
 | Table | Read | Write |
@@ -215,7 +219,7 @@ Executable check, with the app running (uses only the anon key and real sessions
 npm run authz-check
 ```
 
-It verifies 24 cases: anonymous has no access to replies or the queue; Dani reads only his own data, nothing from another brand nor Lucía's in their shared brand; specialists cannot create reviews, edit replies or read the queue or coverage; Nuria cannot see Marta's brand and her queue contains only Brisa Café; a lead cannot review another brand or sign as someone else; `submit_review` rejects a specialist, another lead's brand and a foreign-brand tag without leaving a partial review; Dani's summary holds only his own reviews and his `/me` shows none of Lucía's feedback; and the app route answers 200/404/404/401.
+It verifies 28 cases: anonymous has no access to replies or the queue; Dani reads only his own data, nothing from another brand nor Lucía's in their shared brand; specialists cannot create reviews, edit replies or read the queue or coverage; Nuria cannot see Marta's brand and her queue contains only Brisa Café; a lead cannot review another brand or sign as someone else; `submit_review` rejects a specialist, another lead's brand and a foreign-brand tag without leaving a partial review; Dani's summary holds only his own reviews and his `/me` shows none of Lucía's feedback; specialists read no brand evidence, Nuria none for Voltia, and nobody can sign an intervention as someone else; `/brands/voltia` answers 200 to Marta and 404 to Nuria and Dani; and the app route answers 200/404/404/401.
 
 The required target is a working product with data and roles within ten minutes of a fresh clone; that target has not yet been verified.
 
@@ -225,14 +229,14 @@ The required target is a working product with data and roles within ten minutes 
 npm run check
 ```
 
-Runs ESLint, TypeScript and a production build. These checks passed for P0; application startup and Supabase health were also verified. For P7, lint, typecheck and the production build passed, and `/me` was checked in Chrome (desktop, filter and 390 px). To apply migrations without recreating the local database, run the following. **`npm run db:reset` is an alternative that deletes local data**; reserve it for rebuilding a disposable database:
+Runs ESLint, TypeScript and a production build. These checks passed for P0; application startup and Supabase health were also verified. For P8, lint, typecheck and the production build passed, and `/brands/voltia` was checked in Chrome, including recording a change. To apply migrations without recreating the local database, run the following. **`npm run db:reset` is an alternative that deletes local data**; reserve it for rebuilding a disposable database:
 
 ```sh
 npx --no-install supabase migration up --local
 npm run db:test
 ```
 
-Tests cover assignments, import identity, history, criteria and reviews, rejection of foreign-brand tags and, since P4, every policy: allowed and forbidden access across brands, between specialists in the same brand, between co-leads, after an assignment is removed and for anonymous users; since P5, the queue and coverage per brand and specialist; since P6, atomic submission; since P7, the feedback summary. **159 assertions pass** across six files, on an empty and a seeded database, and SQL lint for `public,private` reports no errors. Exhaustive coverage and deployment are not brief requirements; evaluation runs the project locally. See [model and decisions](docs/data-model.md).
+Tests cover assignments, import identity, history, criteria and reviews, rejection of foreign-brand tags and, since P4, every policy: allowed and forbidden access across brands, between specialists in the same brand, between co-leads, after an assignment is removed and for anonymous users; since P5, the queue and coverage per brand and specialist; since P6, atomic submission; since P7, the feedback summary; since P8, brand evidence and intervention authorship. **169 assertions pass** across seven files, on an empty and a seeded database, and SQL lint for `public,private` reports no errors. Exhaustive coverage and deployment are not brief requirements; evaluation runs the project locally. See [model and decisions](docs/data-model.md).
 
 Only `people` stores the role; a review's brand is derived from its reply and severity lives in the catalog. Under the declared dependencies, the model remains in 3NF. V1 limitations: role, reply brand, review attribution and criterion scope/code/severity are fixed; names, labels and feedback allow corrections. Changing severity requires a new criterion. Reviewers must be assigned leads and the session user; review and tags are saved together (P6). A saved review cannot be edited from the interface in V1. Feedback revision auditing is not implemented.
 
@@ -275,5 +279,7 @@ The [evaluation and delivery matrix](docs/delivery-checklist.md) maps all eight 
 - [Descripción del PR de P6 / P6 PR description](docs/P6-pr.md)
 - [Prompt y registro de P7 / P7 prompt and record](ai-logs/P7.md)
 - [Descripción del PR de P7 / P7 PR description](docs/P7-pr.md)
+- [Prompt y registro de P8 / P8 prompt and record](ai-logs/P8.md)
+- [Descripción del PR de P8 / P8 PR description](docs/P8-pr.md)
 
 El PDF del ejercicio se conserva localmente. / The supplied exercise PDF stays local.
