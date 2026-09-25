@@ -220,6 +220,14 @@ async function main() {
   check(martaBrand === 200 && nuriaBrand === 404 && daniBrand === 404,
     'GET /brands/voltia → 200 for its lead, 404 for another lead and for a specialist', `${martaBrand}/${nuriaBrand}/${daniBrand}`);
 
+  // Page (not API) status: access checks must run before loading.tsx starts
+  // streaming, or a hidden reply would render "not found" with a 200.
+  const reviewPage = (await fetch(`${appUrl}/review/${brisaReply}`, {
+    headers: { Cookie: `${accessCookie}=${marta.token}` },
+    redirect: 'manual',
+  })).status;
+  check(reviewPage === 404, "GET /review/<another brand's reply> page → 404 status", `status ${reviewPage}`);
+
   console.log(failures === 0 ? '\nauthz-check: all checks passed.' : `\nauthz-check: ${failures} check(s) failed.`);
   process.exit(failures === 0 ? 0 : 1);
 }

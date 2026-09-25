@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { EmptyState } from "@/components/empty-state";
 import { scoreLabels, severityStyles } from "@/components/review-labels";
 import { listBrands } from "@/lib/data/brands";
 import { listBrandSummary, listFeedback, type FeedbackItem } from "@/lib/data/feedback";
@@ -139,11 +140,16 @@ export default async function MyFeedbackPage({ searchParams }: PageProps<"/me">)
           Reviews {activeBrand ? `in ${activeBrand.name}` : ""}
         </h2>
         {feedback.length === 0 ? (
-          <p className="rounded-box border border-dashed border-rule px-5 py-6 text-muted">
-            {activeBrand
-              ? `You have no reviews in ${activeBrand.name} yet.`
-              : "You have no reviews yet. When a lead reviews one of your replies, their score and comment will appear here."}
-          </p>
+          activeBrand ? (
+            <EmptyState title={`No reviews in ${activeBrand.name} yet`} action={{ href: "/me", label: "Show all brands" }}>
+              Your lead has not reviewed any of your {activeBrand.name} replies so far.
+            </EmptyState>
+          ) : (
+            <EmptyState title="You have no reviews yet">
+              When a lead reviews one of your replies, the score, the issues they found and their comment appear here, brand by
+              brand.
+            </EmptyState>
+          )
         ) : (
           <ol className="space-y-3">
             {feedback.map((item) => (

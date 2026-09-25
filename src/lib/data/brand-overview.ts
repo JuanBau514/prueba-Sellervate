@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { cache } from 'react';
+
 import type { Coverage } from './queue';
 import { insert, select } from './rest';
 import { isUuid, type Severity } from './workspace';
@@ -28,12 +30,12 @@ export type BrandChange = { id: string; happened_on: string; note: string; autho
 
 const slugPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-/** The brand if the viewer is assigned to it (RLS), else null. */
-export async function getBrandBySlug(slug: string): Promise<BrandHeader | null> {
+/** The brand if the viewer is assigned to it (RLS), else null. Memoized per request. */
+export const getBrandBySlug = cache(async (slug: string): Promise<BrandHeader | null> => {
   if (!slugPattern.test(slug)) return null;
   const [brand] = await select<BrandHeader>(`brands?select=id,slug,name,voice_summary&slug=eq.${slug}`);
   return brand ?? null;
-}
+});
 
 // Every query below is scoped to one brand_id: aggregates never mix brands.
 // The views themselves only return brands the viewer leads.
