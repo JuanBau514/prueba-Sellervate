@@ -15,11 +15,11 @@ insert into public.people (id, full_name, role) values
 insert into public.brands (id, slug, name, voice_summary, procedures_md) values
   ('20000000-0000-0000-0000-000000000001', 'test-scooters', 'Test Scooters', 'Technical and calm', 'Diagnose before offering a return.'),
   ('20000000-0000-0000-0000-000000000002', 'test-packaging', 'Test Packaging', 'Brief and exact', 'Confirm dimensions and pack quantity.');
-insert into public.brand_memberships (person_id, brand_id, role) values
-  ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'specialist'),
-  ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000002', 'specialist'),
-  ('10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001', 'specialist'),
-  ('10000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000001', 'lead');
+insert into public.brand_memberships (person_id, brand_id) values
+  ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001'),
+  ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000002'),
+  ('10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001'),
+  ('10000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000001');
 
 select lives_ok($$
   insert into public.replies (brand_id, specialist_id, customer_message, body, sent_at, first_response_minutes, external_id)
@@ -37,18 +37,33 @@ select throws_ok($$
 $$, '23514', null, 'Unknown roles are rejected');
 
 select throws_ok($$
-  insert into public.brand_memberships (person_id, brand_id, role)
-  values ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'specialist');
+  insert into public.brand_memberships (person_id, brand_id)
+  values ('10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001');
 $$, '23505', null, 'Assignments cannot be duplicated');
 
 select throws_ok($$
-  update public.brand_memberships set role = 'lead'
-  where person_id = '10000000-0000-0000-0000-000000000002';
-$$, '23503', null, 'Membership role must agree with the person role');
+  insert into public.brand_memberships (person_id, brand_id)
+  values ('10000000-0000-0000-0000-000000000099', '20000000-0000-0000-0000-000000000001');
+$$, '23503', null, 'Membership must reference an existing person');
 
 select throws_ok($$
   update public.replies set specialist_id = '10000000-0000-0000-0000-000000000003';
-$$, '23503', null, 'A lead membership cannot be used as a reply author');
+$$, '23514', null, 'A lead membership cannot be used as a reply author');
+
+select throws_ok($$
+  insert into public.replies (brand_id, specialist_id, customer_message, body, sent_at, external_id)
+  values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000003',
+    'Help', 'A lead cannot author this reply.', now(), 'lead-reply');
+$$, '23514', null, 'Lead authors are rejected on INSERT as well as UPDATE');
+
+select throws_ok($$
+  update public.replies set specialist_id = '10000000-0000-0000-0000-000000000099';
+$$, '23503', null, 'A missing reply author is rejected');
+
+select lives_ok($$
+  update public.people set full_name = 'Renamed specialist', role = role
+  where id = '10000000-0000-0000-0000-000000000001';
+$$, 'Profile name edits and unchanged role values remain valid');
 
 select throws_ok($$
   update public.replies set specialist_id = '10000000-0000-0000-0000-000000000002',
@@ -102,7 +117,19 @@ select throws_ok($$
 $$, '23503', null, 'Deleting an Auth identity cannot erase the author and their history');
 select throws_ok($$
   update public.people set role = 'lead' where id = '10000000-0000-0000-0000-000000000001';
-$$, '23503', null, 'Later role changes cannot invalidate existing specialist assignments');
+$$, '23514', null, 'Later role changes cannot invalidate historical replies');
+
+select throws_ok($$
+  update public.people set role = 'lead' where id = '10000000-0000-0000-0000-000000000002';
+$$, '23514', null, 'V1 role immutability applies even before the first reply');
+
+select hasnt_column('public', 'brand_memberships', 'role', 'Membership does not duplicate the person role');
+select hasnt_column('public', 'replies', 'specialist_role', 'Replies do not store a constant role');
+select ok(not exists (
+  select 1 from (values ('anon'), ('authenticated'), ('service_role')) as roles(name)
+  cross join (values ('private.check_reply_specialist()'), ('private.prevent_person_role_change()')) as funcs(name)
+  where has_function_privilege(roles.name, funcs.name, 'EXECUTE')
+), 'Internal trigger functions are not directly executable by API roles');
 
 -- Verify both protections independently: table privileges and RLS. P4 must
 -- replace this baseline with positive/negative tests for its actual policies.
@@ -121,6 +148,22 @@ select ok(not exists (
   where has_table_privilege(roles.name, 'public.' || tables.name,
     'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
 ), 'API roles have no application table privileges yet');
+
+-- The seed uses service_role; author integrity must survive its RLS bypass.
+set local role service_role;
+select lives_ok($$
+  insert into public.replies (brand_id, specialist_id, customer_message, body, sent_at, external_id)
+  values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
+    'Does the charger need replacing?', 'Please confirm whether the indicator lights up.', now(), 'service-fixture');
+$$, 'The seed service role can ingest a valid specialist reply');
+select throws_ok($$
+  insert into public.replies (brand_id, specialist_id, customer_message, body, sent_at, external_id)
+  values ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000003',
+    'Help', 'A lead cannot author this reply.', now(), 'invalid-service-fixture');
+$$, '23514', null, 'The service role bypasses RLS but cannot bypass author integrity');
+reset role;
+delete from public.replies where brand_id = '20000000-0000-0000-0000-000000000001'
+  and source = 'seed' and external_id = 'service-fixture';
 
 -- Grant only inside this rolled-back transaction to prove that RLS itself
 -- denies access even if table privileges were accidentally reintroduced.

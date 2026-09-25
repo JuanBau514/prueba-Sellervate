@@ -12,7 +12,7 @@ See the [scoring and delivery matrix](delivery-checklist.md) for required eviden
 
 - The brief allows Codex and other agents; Claude Code is not a requirement. This session uses Codex.
 - Next.js App Router, TypeScript, Supabase and Tailwind are required. daisyUI, Recharts, local Supabase and the precise schema are implementation choices.
-- One isolated prompt per problem does not require one PR per problem: the original map already groups P1/P2. Keep the original branch mapping for now. Its eleven PRs need to fit the review budget; the brief says four or five are sufficient.
+- The original map grouped P1/P2. The user's normalization review now requires separate branches and PRs: finish P1 on `feat/data-model`, then P2 on `feat/quality-criteria`. Keep the six-hour cap in mind; the brief says four or five real PRs are sufficient.
 - P0 is configured manually from the official Next.js installation pattern because the directory already contains the user's planning files. No starter kit is used.
 - Human review before merge is part of the evaluated deliverable. An agent self-check cannot substitute for it. P0 ends with a reviewable branch; subsequent dependent work follows its review and merge.
 - RLS must be enabled at table creation in P1, with no client access until policies are added in P4.
@@ -35,7 +35,7 @@ git switch -c feat/data-model
 git push -u origin feat/data-model
 ```
 
-The agent prepares a PR description and the [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/data-model); the author creates the PR on GitHub with base `main`, writes their review there and merges with a merge commit after corrections. This is an explicit workflow adaptation to the user's Git-only requirement; it does not replace human review with an agent's self-check. Keep the branch. Return to `main`, pull with `--ff-only`, then create the next problem's branch. P1 and P2 share `feat/data-model`, so P2 continues there before PR1 is merged.
+The agent prepares a PR description and the [comparison link](https://github.com/JuanBau514/prueba-Sellervate/compare/main...feat/data-model); the author creates the PR on GitHub with base `main`, writes their review there and merges with a merge commit after corrections. This is an explicit workflow adaptation to the user's Git-only requirement; it does not replace human review with an agent's self-check. Keep the branch. The author will commit and push the P1 normalization correction. After P1 is integrated, return to `main`, pull with `--ff-only`, then create the separate P2 branch `feat/quality-criteria`. Do not start P2 during this correction.
 
 Keep README.md in Spanish and English with equivalent setup instructions, status, seed/role guidance, actual-time accounting and submission requirements. Maintain the scoring and delivery checklist against the PDF, without declaring unfinished requirements complete.
 
@@ -50,7 +50,7 @@ Use this contract for each new task, replacing `P…` with the entry below:
 | 1 | P0: project base and working rules | `chore/scaffold` | App starts; lint/types/build; local Supabase starts |
 | 2 | P9a: custom visual foundations | `feat/design-tokens` | Theme, type scale and reading typography |
 | 3 | P1: brands, people, memberships and replies | `feat/data-model` | Migration, constraints, indexes, default-deny RLS |
-| 4 | P2: brand-relative criteria and severity | `feat/data-model` (same PR as P1) | Tags/reviews model; migration reruns |
+| 4 | P2: brand-relative criteria and severity | `feat/quality-criteria` (separate PR) | Tags/reviews model; migration reruns |
 | 5 | P3: credible demo dataset | `feat/seed` | Three brands, two leads, three specialists and relative dates |
 | 6 | P4: server authorization and user switching | `feat/authz` | Direct API/database checks, including same-brand privacy |
 | 7 | P5: review queue and coverage | `feat/review-queue` | Per-brand prioritization and distinct lead queues |
@@ -60,7 +60,7 @@ Use this contract for each new task, replacing `P…` with the entry below:
 | 11 | P9b: states and interface polish | `chore/states-polish` | Loading/error/empty states, focus and small screens |
 | 12 | P10: handoff documentation | `docs/decisions` | Fresh-clone instructions, actual time and two-page decisions |
 
-P1 and P2 remain separate prompts but share a branch as specified by the original map. Finish both before that PR's human review and merge. The user selected P1 immediately after P0; P9a remains pending and is not a prerequisite for the database work. Apply the original pipeline's cuts if time runs short.
+P1 and P2 use separate prompts, branches and PRs per the user's latest instruction. The user selected P1 immediately after P0; P9a remains pending and is not a prerequisite for database work. Apply the original pipeline's cuts if time runs short.
 
 ## References consulted for P0
 

@@ -1,6 +1,6 @@
 # P1: represent brands, people, assignments and replies
 
-Prepared description for pipeline PR1. Base: `main`; head: `feat/data-model`. P1 is implemented; P2 will extend this same branch in a separate prompt before the combined PR is ready to merge. This file is not a human review.
+Prepared description for pipeline PR1. Base: `main`; head: `feat/data-model`. P1 includes the normalization correction requested before review. The user will commit and push this correction. P2 is deferred to a separate branch, `feat/quality-criteria`, after P1 is integrated. This file is not a human review.
 
 ## Problem and result
 
@@ -9,7 +9,9 @@ There was no persistent model for who works for each brand or which support repl
 ## Decisions to review
 
 - Supabase Auth supplies identity; `people` stores the profile and memberships define brand assignments. V1 uses one consistent role per person.
-- A generated `specialist_role` constant enables a composite FK to the specialist's brand membership. It enforces the relationship on inserts and later edits without triggers; it is never a form field.
+- The follow-up migration removes the duplicated membership role, generated reply role and supporting redundant unique constraints. `people.role` is the single source of truth; the original published migration is preserved.
+- A composite FK enforces assignment to the reply's brand. A private trigger validates that the author is a specialist, independently of caller RLS, with an empty search path and no direct API execution grants.
+- V1 roles are fixed at profile creation, even before the first reply. An invoker trigger blocks changes; names remain editable. A key-share lock prevents deletion/replacement of an author during ingestion. Promotions require a future history model.
 - `(brand_id, source, external_id)` identifies a reply for future idempotent imports. The identifier belongs to a message, not a ticket. Unknown response time is NULL, not zero.
 - All four tables enable RLS; API grants are revoked and no policies are added until P4. This is the secure baseline, not finished role-based authorization.
 - Referenced assignments and identities cannot be deleted. Offboarding and role changes with history need an archival design before they are offered in the product.
@@ -17,7 +19,7 @@ There was no persistent model for who works for each brand or which support repl
 
 ## Validation
 
-`npm run db:reset` applied the migration; `npm run db:test` passed 38 database assertions; Supabase's local schema lint found no errors. Post-test inspection confirmed all fixtures were rolled back. No application source or dependencies changed.
+The original P1 migration passed 38 assertions. The normalization correction has a transactional upgrade check proving existing rows survive, updated pgTAP coverage for the normalized schema, and schema lint for both public and private objects. Final results are recorded in `ai-logs/P1-normalization.md`. No application source or dependencies changed.
 
 ## Remaining scope
 

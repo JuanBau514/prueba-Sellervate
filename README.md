@@ -10,9 +10,9 @@ Herramienta interna para evaluar respuestas de soporte ya enviadas según los pr
 
 **En construcción; todavía no es la entrega final.** P0 está integrado en `main`. P1 añade en `feat/data-model` las tablas de marcas, personas, asignaciones y respuestas, con integridad e índices y acceso cerrado por defecto. Los criterios/revisiones de P2, seed, cambio de usuario, políticas de autorización y recorridos del producto siguen pendientes.
 
-**`main` es la rama principal de integración y entrega.** Cada problema se trabaja con un prompt independiente y una rama basada en `main`; su PR apunta a `main`. Después de tu revisión escrita y las correcciones, se incorpora mediante **merge commit**, conservando ramas y commits, sin squash ni rebase. P1/P2 comparten un PR según el pipeline. Las mejoras siguientes parten del `main` actualizado.
+**`main` es la rama principal de integración y entrega.** Cada problema se trabaja con un prompt independiente y una rama basada en `main`; su PR apunta a `main`. Después de tu revisión escrita y las correcciones, se incorpora mediante **merge commit**, conservando ramas y commits, sin squash ni rebase. Por tu instrucción más reciente, P1 y P2 tendrán ramas y PR separados: P1 en `feat/data-model` y P2 en `feat/quality-criteria`, después de integrar P1.
 
-`main` es la rama predeterminada y contiene P0 mediante el merge del PR #1 (`1beec2a`). P1/P2 se preparan en `feat/data-model` para PR1 del pipeline (el número asignado por GitHub puede ser distinto). Usamos exclusivamente **Git por SSH** en la terminal y la web de GitHub para crear/revisar/integrar PR. Consulta el [procedimiento de integración](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
+`main` es la rama predeterminada y contiene P0 mediante el merge del PR #1 (`1beec2a`). P1 está en revisión con una corrección incremental de normalización; el autor hará su commit y push. P2 aún no se implementó. Usamos exclusivamente **Git por SSH** en la terminal y la web de GitHub para crear/revisar/integrar PR. Consulta el [procedimiento de integración](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
 
 ### Instalación y ejecución local
 
@@ -43,7 +43,7 @@ Abre http://localhost:3000. Para detener Supabase: `npm run db:stop`.
 
 **P1 implementado; pendientes P2–P4.** Aún no existen cuentas de demo, seed ni selector de usuario. El mínimo del brief es dos marcas, tres especialistas y dos líderes, con respuestas creíbles y suficientes revisiones. Nuestro plan usa tres marcas para demostrar el aislamiento entre líderes. P3 incorporará el seed y P4 el cambio de rol con autorización real en el servidor. Los fixtures de pruebas de P1 se revierten al terminar; no son datos de demostración.
 
-La migración de P1 se aplica con `npm run db:reset` en la base local desechable. El comando de seed y las cuentas se documentarán cuando estén implementados y verificados. El objetivo obligatorio es pasar de un clon limpio al producto con datos y roles en menos de diez minutos; todavía no está verificado.
+Las migraciones de P1 se aplican con `npx --no-install supabase migration up --local`, sin borrar filas existentes. El comando de seed y las cuentas se documentarán cuando estén implementados y verificados. El objetivo obligatorio es pasar de un clon limpio al producto con datos y roles en menos de diez minutos; todavía no está verificado.
 
 ### Validación y limitaciones
 
@@ -51,14 +51,16 @@ La migración de P1 se aplica con `npm run db:reset` en la base local desechable
 npm run check
 ```
 
-Ejecuta ESLint, TypeScript y una compilación de producción. Estas comprobaciones pasaron en P0; también se verificaron el arranque de la app y la salud de Supabase. Para aplicar P1 y probar su integridad en Supabase local, ejecuta lo siguiente en `feat/data-model`. **`db:reset` borra los datos locales**; úsalo solo en la base de desarrollo desechable:
+Ejecuta ESLint, TypeScript y una compilación de producción. Estas comprobaciones pasaron en P0; también se verificaron el arranque de la app y la salud de Supabase. Para aplicar P1 y su corrección sin recrear la base local, ejecuta lo siguiente en `feat/data-model`. **`npm run db:reset` es una alternativa que borra los datos locales**; resérvala para reconstruir una base desechable:
 
 ```sh
-npm run db:reset
+npx --no-install supabase migration up --local
 npm run db:test
 ```
 
 Las pruebas de P1 comprueban asignaciones válidas, identidad de importación, conservación del historial y denegación inicial por RLS. En P4 se reemplazará ese cierre total por pruebas de acceso permitido y prohibido entre marcas y especialistas, incluidas llamadas directas a la API. La cobertura exhaustiva y el despliegue no son requisitos del brief; la evaluación ejecuta el proyecto localmente. Ver [modelo y decisiones de P1](docs/data-model.md).
+
+La corrección elimina el rol duplicado de las asignaciones y el rol generado de las respuestas: solo `people` almacena el rol. Con las dependencias de negocio declaradas, las tablas quedan en 3FN. Pasan **47 pruebas** y el ensayo de actualización conserva las filas existentes. Límite de V1: el rol se fija al crear el perfil; los cambios de nombre sí se permiten. Un trigger valida que el autor sea especialista y una FK comprueba su asignación a la marca.
 
 ESLint está fijado en 9.39.5 por incompatibilidad de los plugins actuales de Next.js con ESLint 10. npm advierte que ESLint 9 está fuera de soporte. El intento de actualización y el fallo observado están registrados en [P0](ai-logs/P0.md).
 
@@ -84,9 +86,9 @@ An internal tool for evaluating already-sent customer support replies against ea
 
 **Work in progress; not the final submission.** P0 is integrated into `main`. P1 adds brands, people, assignments and replies on `feat/data-model`, with integrity constraints, indexes and access denied by default. P2 quality criteria/reviews, seed data, user switching, authorization policies and product journeys are still pending.
 
-**`main` is the integration and delivery branch.** Each problem uses an independent prompt and a working branch based on `main`; its PR targets `main`. After your written review and corrections, it is integrated with a **merge commit**, retaining branches and commits, without squash or rebase. P1/P2 share a PR as specified by the pipeline. Subsequent work starts from the updated `main`.
+**`main` is the integration and delivery branch.** Each problem uses an independent prompt and a working branch based on `main`; its PR targets `main`. After your written review and corrections, it is integrated with a **merge commit**, retaining branches and commits, without squash or rebase. Per your latest instruction, P1 and P2 use separate branches and PRs: P1 on `feat/data-model`, then P2 on `feat/quality-criteria` after P1 is merged.
 
-`main` is the default branch and contains P0 through PR #1's merge (`1beec2a`). P1/P2 are prepared on `feat/data-model` for pipeline PR1 (GitHub may assign a different number). We use only **Git over SSH** in the terminal and GitHub's website to create, review and merge PRs. See the [integration procedure](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
+`main` is the default branch and contains P0 through PR #1's merge (`1beec2a`). P1 is under review with a forward normalization correction; the author will commit and push it. P2 has not been implemented. We use only **Git over SSH** in the terminal and GitHub's website to create, review and merge PRs. See the [integration procedure](docs/implementation-plan.md#main-as-the-integration-and-delivery-branch).
 
 ### Local installation and startup
 
@@ -117,7 +119,7 @@ Open http://localhost:3000. Stop Supabase with `npm run db:stop`.
 
 **P1 implemented; P2–P4 pending.** Demo accounts, seed data and a user switcher do not exist yet. The brief requires at least two brands, three specialists and two team leads, with credible replies and enough scored rows. Our plan uses three brands to demonstrate isolation between leads. P3 adds the seed; P4 adds role switching with real server-side authorization. P1 test fixtures are rolled back after execution and are not demo data.
 
-Apply the P1 migration with `npm run db:reset` on the disposable local database. Seed commands and accounts will be documented once implemented and verified. The required target is a working product with data and roles within ten minutes of a fresh clone; that target has not yet been verified.
+Apply P1 migrations with `npx --no-install supabase migration up --local`, preserving existing rows. Seed commands and accounts will be documented once implemented and verified. The required target is a working product with data and roles within ten minutes of a fresh clone; that target has not yet been verified.
 
 ### Validation and limitations
 
@@ -125,14 +127,16 @@ Apply the P1 migration with `npm run db:reset` on the disposable local database.
 npm run check
 ```
 
-Runs ESLint, TypeScript and a production build. These checks passed for P0; application startup and Supabase health were also verified. To apply P1 and test its integrity on local Supabase, run the following on `feat/data-model`. **`db:reset` deletes local data**; use it only on the disposable development database:
+Runs ESLint, TypeScript and a production build. These checks passed for P0; application startup and Supabase health were also verified. To apply P1 and its correction without recreating the local database, run the following on `feat/data-model`. **`npm run db:reset` is an alternative that deletes local data**; reserve it for rebuilding a disposable database:
 
 ```sh
-npm run db:reset
+npx --no-install supabase migration up --local
 npm run db:test
 ```
 
 P1 tests valid assignments, import identity, history preservation and the initial RLS denial. P4 will replace the complete access closure with allowed/forbidden access tests across brands and specialists, including direct API calls. Exhaustive coverage and deployment are not brief requirements; evaluation runs the project locally. See [P1 model and decisions](docs/data-model.md).
+
+The correction removes the duplicated membership role and generated reply role: only `people` stores the role. Under the declared business dependencies, the tables are in 3NF. **47 assertions pass**, and the upgrade rehearsal preserves existing rows. V1 limitation: roles are fixed at profile creation; name changes remain allowed. A trigger validates specialist authorship and a foreign key enforces assignment to the brand.
 
 ESLint is pinned to 9.39.5 because the current Next.js plugins are incompatible with ESLint 10. npm reports ESLint 9 as out of support. The attempted upgrade and observed failure are recorded in [P0](ai-logs/P0.md).
 

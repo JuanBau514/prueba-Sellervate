@@ -80,7 +80,7 @@ README en **español e inglés**, con contenido equivalente. Consultar la [matri
 |---|---|---|---|
 | P0 | Base del proyecto y reglas de trabajo | Flujo exigido por el brief | PR0 |
 | P1 | Representar marcas, personas, asignaciones y respuestas | Todo | PR1 |
-| P2 | Criterios de calidad relativos a la marca, con severidad | Capas 3 y 4 | PR1 |
+| P2 | Criterios de calidad relativos a la marca, con severidad | Capas 3 y 4 | PR1b (separado por instrucción del usuario) |
 | P3 | Datos creíbles para ver el producto funcionar | Brief: seed inventado | PR2 |
 | P4 | Quién ve qué, aplicado en el servidor | Aislamiento, privacidad | PR3 |
 | P5 | Elegir qué revisar sin puntos ciegos | Capa 2 (muestreo) | PR4 |
@@ -137,18 +137,18 @@ Propuesta inicial (a validar en el PR):
 
 ---
 
-### P1 + P2 · Modelo de datos — `feat/data-model` (30 min)
+### P1 + P2 · Modelo de datos — ramas separadas (presupuesto conjunto: 30 min)
 
 **Problema P1:** representar quién trabaja en qué marca y qué respuestas se enviaron, de forma que la importación desde el helpdesk sea posible después.
 
 **Problema P2:** la calidad depende de la marca y los errores tienen pesos distintos.
 
-**Solución con el stack:** migraciones SQL en `supabase/migrations/`. P1 y P2 se implementan en prompts y commits separados dentro de `feat/data-model`: P1 crea las cuatro tablas base; P2 agrega los criterios y las revisiones. Detalles de integridad de P1 en [docs/data-model.md](docs/data-model.md).
+**Solución con el stack:** migraciones SQL en `supabase/migrations/`. Tras la revisión de normalización, el usuario solicitó ramas separadas: P1 y su corrección en `feat/data-model`; P2, posteriormente, en `feat/quality-criteria` desde `main` con P1 integrado. P1 crea las cuatro tablas base; P2 agregará criterios y revisiones. Detalles de normalización e integridad de P1 en [docs/data-model.md](docs/data-model.md).
 
 ```
 people            id (= auth.users.id), full_name, role ('lead'|'specialist')
 brands            id, slug unique, name, voice_summary, procedures_md
-brand_memberships person_id, brand_id, role ('lead'|'specialist')   pk(person_id, brand_id)
+brand_memberships person_id, brand_id, created_at   pk(person_id, brand_id)
 replies           id, brand_id, specialist_id, customer_message, body,
                   sent_at, first_response_minutes,
                   source default 'seed', external_id
@@ -226,7 +226,7 @@ brand_changes     id, brand_id, author_id, happened_on, note
 
 **Qué revisar en el PR (el más importante):**
 - service role en cualquier archivo bajo `src/`;
-- políticas que miran `people.role` global en vez de `brand_memberships`;
+- políticas que miran solo `people.role` sin exigir la asignación correspondiente en `brand_memberships`; el rol ya no se duplica en las membresías;
 - funciones `security definer` sin `search_path`;
 - políticas de insert sin `with check`.
 
@@ -355,7 +355,7 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 |---|---|---|---|
 | PR0 | `chore/scaffold` | 15 | 0:15 |
 | PR0b | `feat/design-tokens` | 15 | 0:30 |
-| PR1 | `feat/data-model` | 30 | 1:00 |
+| PR1 + PR1b | `feat/data-model` + `feat/quality-criteria` | 30 | 1:00 |
 | PR2 | `feat/seed` | 25 | 1:25 |
 | PR3 | `feat/authz` | 35 | 2:00 |
 | PR4 | `feat/review-queue` | 25 | 2:25 |
@@ -388,7 +388,9 @@ En español e inglés, manteniendo ambas versiones equivalentes y usando `main` 
 | 2026-09-24 | `chore/scaffold` / GitHub PR #1 | `bcf7d90` | Base ejecutable, configuración local, reglas y prompt independiente; ver `ai-logs/P0.md` | P0 | Integrado posteriormente mediante merge commit | Ver `docs/time-log.md` |
 | 2026-09-24 | `chore/scaffold` / GitHub PR #1 | `c089886` | README bilingüe y criterios de entrega, commit realizado por el autor | P0 | Corrección solicitada por el usuario | Ver `docs/time-log.md` |
 | 2026-09-24 | `main` / GitHub PR #1 | `1beec2a` | Integración de P0 con merge commit | P0 | Historial conservado; lectura del comentario de revisión pendiente | Ver `docs/time-log.md` |
-| 2026-09-24 | `feat/data-model` / PR1 del pipeline | Asunto: `feat: model brands people assignments and replies` | Migración de cuatro tablas, RLS cerrado, 38 pruebas de integridad/acceso y documentación bilingüe | P1 | P2 seguirá en esta rama; PR y revisión humana pendientes | Ver `docs/time-log.md` |
+| 2026-09-24 | `feat/data-model` / PR1 del pipeline | `67ab919` | Migración inicial de cuatro tablas, RLS cerrado, 38 pruebas de integridad/acceso y documentación bilingüe | P1 | El plan inicial de compartir rama con P2 fue sustituido después por ramas separadas | Ver `docs/time-log.md` |
+
+**Corrección del 2026-09-25 pendiente de commit del autor:** nueva migración de normalización, rol solo en `people`, eliminación de columnas/índices redundantes, validación de autor y 47 pruebas aprobadas. El ensayo de actualización conservó las filas existentes. Ver `ai-logs/P1-normalization.md`. No se hizo commit/push ni se inició P2.
 
 ### Plantilla de revisión para cada PR
 
